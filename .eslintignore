@@ -1,0 +1,4 @@
+# list of folders to ignore
+migrations/**
+seeders/**
+scripts/**

@@ -1,0 +1,69 @@
+extends layout
+
+block content
+
+  script(src='/javascripts/otpGraph.js')
+
+  script.
+    $( document ).ready(function() {
+    getLastUpdated()
+    });
+
+  script.
+    function triggerGraph(){
+      const loggedinUser = $('#loggedinUser').val();
+      const lambdaFunctionName = $('#lambdaFunctionName').val();
+      triggerOTPGraph(loggedinUser,lambdaFunctionName)
+    }
+
+
+
+  input(type='hidden', id='cognitoRegion' value=s3Region)
+  input(type='hidden', id='s3AccessKeyId' value=s3AccessKeyId)
+  input(type='hidden', id='s3SecretAccessKey' value=s3SecretAccessKey)
+  input(type='hidden', id='loggedinUser' value=loggedinUser)
+  input(type='hidden', id='lambdaFunctionName' value=lambdaFunctionName)
+  input(type='hidden', id='s3BucketName' value=s3BucketName)
+
+  
+  .topnav
+    ul.breadcrumb
+        li
+            a(href='/datapipeline') Data Pipeline
+                i.fa.fa-caret-right(aria-hidden='true')
+        li Update OTP Graph
+    .gradient
+      .username.userright #{user.username}
+        i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+  .tableheader
+      h7#otplastupdated Last Updated on:
+  .tablecontainer.table-sm
+      table.table.btn-table.table-responsive.w-auto.table-striped.table-borderless(id="table")
+      
+        thead
+          tr
+            th 
+            th Last Updated
+            th Updated By
+            th Status
+        tbody#otptbody
+          tr
+            td
+            td(id='last-updated' align='center')
+            td(id='updated-by' align='center' )
+            td(id='update-status' align='center')
+           
+          
+  button#updateOtpButton.primarybutton(type='button' onClick='triggerGraph()') Update
+
+  #triggerAlert
+  
+
+
+
+
+
+  
+  
+

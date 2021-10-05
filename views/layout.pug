@@ -1,0 +1,263 @@
+doctype html
+html
+  head
+    title= title
+    
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
+
+    link(rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.1/dist/bootstrap-table.min.css")
+    link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous")
+    link(rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous")
+    link(rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.1/dist/bootstrap-table.min.css")
+    link(rel="stylesheet" href='/stylesheets/commons.css')
+    link(rel="stylesheet" href='/stylesheets/commontabletscreen.css')
+    link(rel='stylesheet' href='/stylesheets/style.css')
+    link(rel="stylesheet" href="https://unpkg.com/ionicons@4.5.5/dist/css/ionicons.min.css")
+    link(rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous")
+    link(rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin="")
+
+    script( defer src='https://code.iconify.design/1/1.0.7/iconify.min.js')
+    script( defer src='https://kit.fontawesome.com/b99e675b6e.js')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous")
+    script(src='https://code.jquery.com/jquery-3.4.1.js')   
+    
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"
+  integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+  crossorigin="")
+    script( src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous")
+    script( src="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.js")
+    script( src="https://unpkg.com/bootstrap-table@1.17.1/dist/extensions/export/bootstrap-table-export.min.js")
+    script( async="true" src='https://kit.fontawesome.com/b99e675b6e.js')
+ 
+    //-font-link
+    link(rel='preconnect' href='https://fonts.googleapis.com')
+    link(rel='preconnect' href='https://fonts.gstatic.com' crossorigin='')
+    link(href='https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap' rel='stylesheet')
+
+    //- Bootstrap Select
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta/dist/css/bootstrap-select.min.css")
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta/dist/js/bootstrap-select.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta/dist/js/i18n/defaults-*.min.js")
+
+    //- Crypto
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js')
+
+    //- Amazon AWS SDK API
+    script(src="https://sdk.amazonaws.com/js/aws-sdk-2.792.0.min.js")
+    
+    //- For polyline decoding; from https://github.com/mapbox/polyline/
+    script(src='/javascripts/polyline.js')
+    
+    //- For Bing Layer Leaflet Plugin; from https://github.com/digidem/leaflet-bing-layer
+    script(src='/javascripts/leaflet-bing-layer.js')
+    
+    //- Form serializer, encoder, Write Map Notes and save methods
+    script(src='/javascripts/serializeTransitInstruction.js')
+    
+    //- https://www.npmjs.com/package/leaflet-triangle-marker
+    script(src='/javascripts/leaflet-triangle-marker.js')
+
+    //- Leaflet Marker Cluster Plugin
+    link(rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css")
+    link(rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css")
+    script(src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js")
+
+    //- Leaflet Full Screen https://github.com/Leaflet/Leaflet.fullscreen
+    link(rel='stylesheet' href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css')
+    script(src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js')
+
+    //- Leaflet EasyButton Plugin
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css")
+    script(src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js")
+
+    //- https://www.npmjs.com/package/leaflet-spin
+    script(src='/javascripts/spin.js')
+    script(src='/javascripts/leaflet.spin.min.js')
+
+    //- Photoviewer
+    link(href="/stylesheets/photoviewer.css" rel="stylesheet")
+    link(href="/stylesheets/photoviewerBezelLess.css" rel="stylesheet")
+    script(src="/javascripts/photoviewer.js")
+  
+    //- JqueryUI
+    link(href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/cupertino/jquery-ui.min.css" rel="stylesheet")
+    link(href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js")
+    
+    //- Leaflet PolyMeasure control Plugin https://github.com/ppete2/Leaflet.PolylineMeasure
+    link(rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css")
+    script(src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js")
+   
+    //- Leaflet Grouped Layer Control https://github.com/ismyrnow/leaflet-groupedlayercontrol
+    link(rel="stylesheet" href="/stylesheets/leaflet.groupedlayercontrol.css")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-groupedlayercontrol/0.6.1/leaflet.groupedlayercontrol.js")
+
+    //- Leaflet GeoSearch Plugin https://github.com/smeijer/leaflet-geosearch
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geosearch/3.5.0/geosearch.css")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geosearch/3.5.0/geosearch.umd.js")
+
+    //- Leaflet EasyPrint Plugin https://github.com/rowanwins/leaflet-easyPrint
+    script(src="https://cdn.jsdelivr.net/npm/leaflet-easyprint@2.1.9/dist/bundle.min.js")
+
+
+    script.
+      !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+
+      $(document).ready(function($) {
+        var alterClass = function() {
+          var ww = document.body.clientWidth;
+          if (ww > 1200) {
+          $('.navbarprimary').removeClass('collapsed');
+          } else { 
+            $('.navbarprimary').addClass('collapsed');
+        };
+      };
+      $(window).resize(function(){
+      alterClass();
+      });
+      alterClass();
+      });
+
+      
+  body
+    block nav
+    - let active = "home.pug"
+      nav.navbarprimary
+        ul.navbarprimary-menu#otherUsers
+          li
+            img.logo(src='/images/kingcountylogo.png' alt="kingcountylogo")
+            a(href='/home' id="home")
+              .nav-icon
+                iconify-icon(data-icon='clarity:home-solid')
+              span.nav-label Home
+            a(href="/tripRequests/list"  id="tripRequests")
+              .nav-icon
+                iconify-icon(data-icon='mdi:map-marker-distance')
+              span.nav-label Trip History
+            a(href="/clients/list" id="clients")
+              .nav-icon
+                iconify-icon(data-icon='ri:map-pin-user-fill')
+              span.nav-label Clients
+            a(href='/reviews' id="reviews")
+              .nav-icon
+                iconify-icon(data-icon='ic:baseline-edit-road')
+              span.nav-label Reviews
+            a(href='/pathwayItinerary/list' id="pathways")
+              .nav-icon
+                iconify-icon(data-icon='si-glyph:pin-location-map')
+              span.nav-label Pathways
+            a(href='/reports/statReports' id="reports")
+              .nav-icon
+                iconify-icon(data-icon='codicon:files')
+              span.nav-label.feat-btn Reports
+            a(href='/dataPipeline' id="pipeline")
+              .nav-icon
+                iconify-icon(data-icon='codicon:source-control')
+              span.nav-label.feat-btn Data Pipeline
+            a(href='/settings' id='settings')
+              .nav-icon
+                iconify-icon(data-icon='ic:baseline-settings')
+              span.nav-label Settings
+            a(href='/login' class="logout" id="logout")
+              .nav-icon.logoutbutton
+                iconify-icon(data-icon='ri:logout-circle-line')
+              span.nav-label.logoutlabel Logout
+        ul.navbarprimary-menu#agencyUser
+          li
+            img.logo(src='/images/kingcountylogo.png' alt="kingcountylogo")
+            a(href='/home' id="home")
+              .nav-icon
+                iconify-icon(data-icon='clarity:home-solid')
+              span.nav-label Home
+            a(href='/pathwayItinerary/list' id="pathways")
+              .nav-icon
+                iconify-icon(data-icon='si-glyph:pin-location-map')
+              span.nav-label Pathways
+            a(href='/reports/statReports' id="reports")
+              .nav-icon
+                iconify-icon(data-icon='codicon:files')
+              span.nav-label.feat-btn Reports
+            a(href='/login' class="logout" id="logout")
+              .nav-icon.logoutbutton
+                iconify-icon(data-icon='ri:logout-circle-line')
+              span.nav-label.logoutlabel Logout
+              
+          
+        .navweather
+          a.weatherwidget-io(href='https://forecast7.com/en/47d55n121d98/king-county/?unit=us'  data-font='Times New Roman' data-icons='Climacons Animated' data-mode='Current' data-textcolor='#fefefe')
+
+    .main-content
+      #loader
+        #spinner.center
+      .togglebutton
+        a.btn-expand-collapse(href='#')
+          .toggle-icon 
+            iconify-icon(data-icon='system-uicons:side-menu')
+
+      .dashtitle
+    
+      block content
+
+  script.
+    $('.btn-expand-collapse').click(function(e) {
+      $('.navbarprimary').toggleClass('collapsed');
+    });
+    $('.feat-btn').click(function(){
+      $('nav ul .feat-show').toggleClass("show");
+      $('nav ul .first').toggleClass("rotate");
+    });
+    $('.feat-btn').click(function(){
+      $('nav ul .feat-show').toggleClass("show");
+      $('nav ul .first').toggleClass("rotate");
+    });
+    $('.serv-btn').click(function(){
+      $('nav ul .serv-show').toggleClass("show1");
+      $('nav ul .second').toggleClass("rotate");
+    });
+    $('nav ul li').click(function(){
+      $(this).addClass("active").siblings().removeClass("active");
+    });
+
+    document.onreadystatechange = function() {
+      if (document.readyState !== "complete") {
+      document.querySelector(
+      "#loader").style.visibility = "visible";
+      } else {
+      document.querySelector(
+      "#loader").style.display = "none";
+      }
+    };
+
+    const loader = () => $('body').append('<div style="" id="spinner" class="center"></div>');
+
+    document.getElementById('tripRequests').addEventListener('click', () => loader())
+    document.getElementById('home').addEventListener('click', () => loader())
+    document.getElementById('clients').addEventListener('click', () => loader())
+    document.getElementById('reviews').addEventListener('click', () => loader())
+    document.getElementById('pathways').addEventListener('click', () => loader())
+    document.getElementById('reports').addEventListener('click', () => loader())
+    
+    $(function(){
+      $('a#logout').click(function(){
+        if(confirm('Are you sure to logout?')) {
+            document.cookie = "user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            return true;
+        }
+
+        return false;
+      });
+    });
+
+    if (document.cookie) {
+      if(document.cookie == 'user=agency' ){
+        console.log(document.cookie);
+        document.getElementById("agencyUser").style.display = "block";
+      }
+    }
+    else {
+      document.getElementById("otherUsers").style.display = "block";
+    }

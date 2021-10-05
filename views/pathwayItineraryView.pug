@@ -1,0 +1,726 @@
+doctype html
+html
+
+    head
+
+        style. 
+            body {
+                font-family: 'Roboto', sans-serif;
+                font-size: 14px;
+                background-color: #F7F7F7;
+            }
+            #map {
+                width: 100%;
+                min-height: 600px;
+            }
+            .container { 
+                max-width: 100%; 
+            }
+            .tripinfo {
+                margin-top: 2%;
+            }
+            .Tripduration{
+                font-size: 1.4em;
+                color: #23221F;
+                padding-left: 0.4em;
+            }
+            .durationdiv{
+                display: flex;
+                justify-content: start;
+                margin-bottom: 0.5em;
+            }
+            .durationinput{
+                width: 8em !important; 
+                margin-left: 0.7em;
+            }
+            .mode{
+                border-bottom:solid 2px #EBEDF3;
+                margin-bottom: 2em;
+            }
+            .form-control:disabled,
+            .form-control[readonly] {
+                background-color: #ebedf3;
+                border: none;
+            }
+            .form-control-trip{
+                width: 70%;
+            }
+            .leaflet-control-layers-group-name {
+                font-weight: bold;
+                font-size: larger;
+                border-bottom: 2px solid black;
+                color: black;
+                margin-bottom: .5em;
+                margin-left: 3px;
+            }
+
+                .leaflet-control-layers-group {
+                background-color: rgba(241, 241, 241, 0.719);
+                margin-bottom: .5em;
+                }
+
+                .leaflet-control-layers-scrollbar {
+                overflow-y: scroll;
+                padding-right: 10px;
+                }
+            .css {
+                background-color: white;
+                border: none;
+            }
+            .card {
+                padding-top: 10px;
+                padding-left: 20px;
+                padding-bottom: 10px;
+                border-radius: 20px;
+            }
+            .feed{
+                color: #0275d8;
+                padding-top: 1.2%;
+                font-size: 1.5em;
+                padding-left: 3%;
+            }
+            .zooom{
+                    margin-left: 12px;
+                    font-size: 22px;
+                    cursor: pointer;
+                }
+            .formmenu{
+                    display: flex;
+                    justify-content: space-evenly;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+            }
+            .topnav {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            
+            ul.breadcrumb {
+            padding: 10px 16px;
+            list-style: none;
+            }
+            .breadcrumb {
+            //background-color: #f7f7f7;
+            }
+            ul.breadcrumb li {
+            display: inline;
+            font-size: 24px;
+            }
+            ul.breadcrumb li + li:before {
+            padding: 8px;
+            color: black;
+            }
+            ul.breadcrumb li a {
+            color: #0275d8;
+            text-decoration: none;
+            }
+            ul.breadcrumb li a:hover {
+            color: #01447e;
+            text-decoration: none;
+            }
+            .fa.fa-caret-right {
+            color: black;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            }
+            .gradient {
+            font-size: 18px;
+            padding: 10px;
+            text-align: center;
+            transition: 0.5s;
+            background-size: 200% auto;
+            color: white;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px #eee;
+            border-radius: 10px;
+            height: 2.5em;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            display: inline-block;
+            border-radius: 12px;
+            background-image: linear-gradient(
+                to left,
+                #a8c0ff 0%,
+                #3a7bd5 51%,
+                #3f2b96 100%
+            );
+            }
+            .usernameicon {
+                font-size: 22px;
+                margin-left: 0.6em;
+            }
+            .fullbody{
+                padding: 2em;
+                background-color: #F7F7F7;
+            }
+            .primarybutton {
+                padding: 10px 30px;
+                height: 40px;
+                text-decoration: none;
+                font-weight: 500;
+                letter-spacing: 2px;
+                background-color: #315590;
+                color: white;
+                border: none;
+                font-size: 16px;
+                border-radius: 0.4em;
+                margin: 0.5em;
+            }
+            .primarybutton:hover {
+                box-shadow: 0 14px 28px rgba(134, 172, 235, 0.25),
+                    0 10px 10px rgba(134, 172, 235, 0.25);
+            }
+            .secondarybutton {
+                padding: 0px 30px 0px 30px;
+                height: 40px;
+                text-decoration: none;
+                font-weight: 400;
+                letter-spacing: 2px;
+                background-color: white;
+                border: 2.5px solid #315590;
+                color: #315590 !important;
+                border-color: #315590;
+                font-size: 16px;
+                border-radius: 0.4em;
+                margin: 0.5em;
+            }
+            .secondarybutton:hover {
+                box-shadow: 0 14px 28px rgba(134, 172, 235, 0.25),
+                    0 10px 10px rgba(134, 172, 235, 0.25);
+            }
+        
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
+
+    link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous")
+    link(rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous")
+    link(rel="stylesheet" href="https://unpkg.com/ionicons@4.5.5/dist/css/ionicons.min.css")
+    link(rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous")
+    link(rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin="")
+
+    script( defer src='https://code.iconify.design/1/1.0.7/iconify.min.js')
+    script( defer src='https://kit.fontawesome.com/b99e675b6e.js')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous")
+    script(src='https://code.jquery.com/jquery-3.4.1.js')   
+    
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"
+  integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+  crossorigin="")
+    script( src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous")
+    script( async="true" src='https://kit.fontawesome.com/b99e675b6e.js')
+ 
+    //-font-link
+    link(rel='preconnect' href='https://fonts.googleapis.com')
+    link(rel='preconnect' href='https://fonts.gstatic.com' crossorigin='')
+    link(href='https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400&display=swap' rel='stylesheet')
+    
+    //- For polyline decoding; from https://github.com/mapbox/polyline/
+    script(src='/javascripts/polyline.js')
+    
+    //- For Bing Layer Leaflet Plugin; from https://github.com/digidem/leaflet-bing-layer
+    script(src='/javascripts/leaflet-bing-layer.js')
+    
+    //- https://www.npmjs.com/package/leaflet-triangle-marker
+    script(src='/javascripts/leaflet-triangle-marker.js')
+
+    //- Leaflet Marker Cluster Plugin
+    link(rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css")
+    link(rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css")
+    script(src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js")
+
+    //- Leaflet Full Screen https://github.com/Leaflet/Leaflet.fullscreen
+    link(rel='stylesheet' href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css')
+    script(src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js')
+
+    //- Leaflet EasyButton Plugin
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css")
+    script(src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js")
+
+    //- https://www.npmjs.com/package/leaflet-spin
+    script(src='/javascripts/spin.js')
+    script(src='/javascripts/leaflet.spin.min.js')
+  
+    //- JqueryUI
+    link(href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/cupertino/jquery-ui.min.css" rel="stylesheet")
+    link(href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js")
+    
+    //- Leaflet PolyMeasure control Plugin https://github.com/ppete2/Leaflet.PolylineMeasure
+    link(rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css")
+    script(src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js")
+   
+    //- Leaflet Grouped Layer Control https://github.com/ismyrnow/leaflet-groupedlayercontrol
+
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-groupedlayercontrol/0.6.1/leaflet.groupedlayercontrol.js")
+
+    //- Leaflet GeoSearch Plugin https://github.com/smeijer/leaflet-geosearch
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geosearch/3.5.0/geosearch.css")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geosearch/3.5.0/geosearch.umd.js")
+    
+    //- PDF converter lib
+    script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js")
+    script(type="text/javascript" src="https://html2canvas.hertzen.com/dist/html2canvas.js")
+
+    //- Leaflet EasyPrint Plugin https://github.com/rowanwins/leaflet-easyPrint
+    script(src="https://cdn.jsdelivr.net/npm/leaflet-easyprint@2.1.9/dist/bundle.min.js")
+  
+    script.
+        const routeData = !{JSON.stringify(ADAPathwaySearchResult[0].pathwayItinerary)};
+        let JSONrouteData;
+        let selectedItinNumber;
+        let itin;
+        if (routeData) {
+            JSONrouteData = JSON.parse(routeData);
+            selectedItinNumber = !{ADAPathwaySearchResult[0].selectedItinNumber};
+            itin = JSONrouteData.plan.itineraries[selectedItinNumber];
+        } else {
+            JSONrouteData = null;
+            selectedItinNumber = !{ADAPathwaySearchResult[0].selectedItinNumber};
+            itin = null;
+        }
+
+        let indexLegParam;
+        let tripRequestIdParam;
+        let itinlength;
+
+        function tripRequestHistoryURL() {
+            return window.location.origin + "/tripRequests/update" + "?id=" + !{tripRequestSearchResult[0].id};
+        }
+
+        function zoomSegment(i, mode) {
+            $([document.documentElement, document.body]).animate({scrollTop: $('#map').offset().top}, 2000);
+            if (itin) {
+                if (mode === 'WALK') {
+                    thisleglat = (itin.legs[i].steps[0].lat);
+                    thisleglon = (itin.legs[i].steps[0].lon);
+                    corner1 = L.latLng(thisleglat, thisleglon);
+                    if ( i === 0 ){
+                        nextleglat = (itin.legs[i+1].from.lat);
+                        nextleglon = (itin.legs[i+1].from.lon);
+                    }
+                    else 
+                    nextleglat = (itin.legs[i].to.lat);
+                    nextleglon = (itin.legs[i].to.lon);
+                    corner2 = L.latLng(nextleglat, nextleglon);
+                    bounds = L.latLngBounds(corner1, corner2);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['BingAerialLabels'].addTo(map);
+                    map.fitBounds(bounds, {padding: [40,40]});
+                }
+                else if (mode === 'BUS') {
+                    lat1 = (itin.legs[i].from.lat);
+                    lon1 = (itin.legs[i].from.lon);
+                    lat2 = (itin.legs[i].to.lat);
+                    lon2 = (itin.legs[i].to.lon);
+                    corner1 = L.latLng(lat1, lon1);
+                    corner2 = L.latLng(lat2, lon2);
+                    bounds = L.latLngBounds(corner1, corner2);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['BingAerialLabels'].addTo(map);
+                    map.fitBounds(bounds, {padding: [40,40]});
+                }
+            }
+        }
+  
+        function zoomMapTo(i, s, mode) {
+            $([document.documentElement, document.body]).animate({scrollTop: $('#map').offset().top}, 2000);
+            if (itin) {
+                if (mode === 'WALK') {
+                    latLon = [parseFloat(itin.legs[i].steps[s].lat), parseFloat(itin.legs[i].steps[s].lon)];
+                    map.removeLayer(overlayMaps['Transit-Stops']);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['BingAerialLabels'].addTo(map);
+                    map.setView(latLon, 20); 
+                } else if (mode === 'busStopFrom'){
+                    latLon = [parseFloat(itin.legs[i].from.lat), parseFloat(itin.legs[i].from.lon)];
+                    map.removeLayer(overlayMaps['Transit-Stops']);
+                    map.removeLayer(baseMaps['BingAerialLabels']);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['OSM-Carto'].addTo(map);
+                    map.setView(latLon, 20);  
+                } else if (mode === 'busStopTo'){
+                    latLon = [parseFloat(itin.legs[i].to.lat), parseFloat(itin.legs[i].to.lon)];
+                    map.removeLayer(overlayMaps['Transit-Stops']);
+                    map.removeLayer(baseMaps['BingAerialLabels']);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['OSM-Carto'].addTo(map);
+                    map.setView(latLon, 20);     
+                }
+            }
+
+        }
+
+
+        function exportPDF() {
+            
+            const elementID = '#exportable';
+            const buttonsElementID = 'viewButtons';
+            const mapElementID = 'mapExport';
+            const fileName = 'exportedPathwayID' + !{ADAPathwaySearchResult[0].id} + 'TripID' + !{tripRequestSearchResult[0].id} +'.pdf';
+            
+            document.getElementById(buttonsElementID).style.visibility = 'hidden';
+            document.getElementById(mapElementID).style.visibility = 'hidden';
+
+            let HTML_Width = $(elementID).width();
+            let HTML_Height = $(elementID).height();
+            let top_left_margin = 15;
+            let PDF_Width = HTML_Width + (top_left_margin * 2);
+            let PDF_Height = (PDF_Width * 1.5) + (top_left_margin * 2);
+            let canvas_image_width = HTML_Width;
+            let canvas_image_height = HTML_Height;
+
+            let totalPDFPages = Math.ceil(HTML_Height / PDF_Height) - 1;
+
+            html2canvas($(elementID)[0]).then(function (canvas) {
+                let imgData = canvas.toDataURL("image/jpeg", 1.0);
+                let pdf = new jsPDF('p', 'pt', [PDF_Width, PDF_Height]);
+                pdf.addImage(imgData, 'JPG', top_left_margin, top_left_margin, canvas_image_width, canvas_image_height);
+                for (let i = 1; i <= totalPDFPages; i++) { 
+                    pdf.addPage(PDF_Width, PDF_Height);
+                    pdf.addImage(imgData, 'JPG', top_left_margin, -(PDF_Height*i)+(top_left_margin*4),canvas_image_width,canvas_image_height);
+                }
+                pdf.save(fileName);
+            });
+            
+            document.getElementById(buttonsElementID).style.visibility = '';
+            document.getElementById(mapElementID).style.visibility = '';
+        }
+
+
+        function exportHTML() {
+            const elementID = 'exportable';
+            const buttonsElementID = 'viewButtons';
+            const mapElementID = 'mapExport';
+            const fileName = 'exportedPathwayID' + !{ADAPathwaySearchResult[0].id} + 'TripID' + !{tripRequestSearchResult[0].id} +'.HTML';
+            const hiddenInputFormDataNames = ['itinData', 'bingMapKey', 'customlayerID', 's3AccessKeyId', 's3SecretAccessKey', 'fieldReviewRecords', 'historicPicMetaDataLayersSeattle', 'transportThunderforestKey', 'mapboxAccountStyleID', 'mapboxAccountKey', 'ADAPathwayRecords'];
+            let blob;
+            let file;
+            let url;
+            let link;
+            let htmlExtract;
+            let tmpHiddenInputFormDataStore;
+            let tmpSingleHiddenInputFormDataStore;
+            let classesToHide;
+
+            let userHTMLExportConfirm = confirm("HTML Export will reload page?");
+
+            if (userHTMLExportConfirm == true) {
+
+                for (let i = 0; i < hiddenInputFormDataNames.length; i++) {
+                    document.getElementById(hiddenInputFormDataNames[i]).value = '';
+                }
+
+                document.getElementById(buttonsElementID).style.visibility = 'hidden';
+                document.getElementById(mapElementID).style.visibility = 'hidden';
+                classesToHide = document.querySelectorAll('.zooom');
+                classesToHide.forEach(function(elementsToHide){
+                    elementsToHide.style = 'display: none;'
+                });
+
+                
+                htmlExtract = document.documentElement.outerHTML;
+
+                document.getElementById(buttonsElementID).style.visibility = '';
+                document.getElementById(mapElementID).style.visibility = '';
+                classesToHide.forEach(function(elementsToHide){
+                    elementsToHide.style = 'display: show;'
+                });
+
+                window.location.reload(false); 
+
+                blob = new Blob([htmlExtract], {type: 'text/plain;charset=utf-8'});
+                url = URL.createObjectURL(blob);
+                link = document.createElement('A');
+                link.href = url;
+                link.download = fileName;  
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);         
+            } else {
+                //- pass
+            }
+        }
+
+    
+    input(type='hidden' id='numItin' value=ADAPathwaySearchResult[0].selectedItinNumber)
+    input(type='hidden' id='itinData' value='')
+
+    input(type='hidden' id='otpEndpoint' value=settingsRecord.otpEndpoint)
+    input(type='hidden' id='osmEndpoint' value=settingsRecord.osmEndpoint)
+    input(type='hidden' id='geocoderEndpoint' value=settingsRecord.geocoderEndpoint)
+    input(type='hidden' id='bingMapKey' value=settingsRecord.bingMapKey)
+    input(type='hidden', id='customlayerID' value=settingsRecord.userSettings)
+    input(type='hidden', id='settingsRecordBbox' value=settingsRecord.bbox)
+
+    input(type='hidden', id='cognitoRegion' value=settingsRecord.cognitoRegion)
+    input(type='hidden', id='s3AccessKeyId' value=settingsRecord.s3AccessKeyId)
+    input(type='hidden', id='s3SecretAccessKey' value=settingsRecord.s3SecretAccessKey)
+    input(type='hidden', id='s3BucketName' value=settingsRecord.s3BucketName)
+
+    input(type='hidden', id='fieldReviewRecords' value=fieldReviewSearchResult)
+    input(type='hidden', id='historicPicMetaDataLayersSeattle' value=historicPicMetaDataLayersSeattle)
+
+    input(type='hidden', id='transportThunderforestKey' value=settingsRecord.transportTileLayerKey)
+    input(type='hidden', id='customTileLayerName' value=settingsRecord.customTileLayerName)
+    input(type='hidden', id='mapboxAccountName' value=settingsRecord.mapboxAccountName)
+    input(type='hidden', id='mapboxAccountStyleID' value=settingsRecord.mapboxAccountStyleID)
+    input(type='hidden', id='mapboxAccountKey' value=settingsRecord.mapboxAccountKey)
+
+    input(type='hidden' id='ADAPathwayRecords', value=ADAPathwayRecords)
+    
+    .fullbody(id='exportable')
+        .topnav
+            ul.breadcrumb
+                li
+                    a(href='/pathwayItinerary/list').parentbreadcrumb Pathway List
+                        i.fa.fa-caret-right(aria-hidden='true')
+                li View Pathway Itinerary Transit Instruction
+            .gradient
+                .username.userright #{user.username} 
+                    i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+        .tripinfo
+            .form-row
+                .form-group.col-sm-1
+                    label(for='id') PathwayID:
+                    input#id.form-control.form-control-sm(type='text' placeholder='PathwayID' name='id'  readonly required='true' value=ADAPathwaySearchResult[0].id)  
+                .form-group.col-sm-1
+                    label(for='clientId') ClientID: 
+                    input#clientId.form-control.form-control-sm(type='text' placeholder='ClientId' name='clientId'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.clientId)               
+                .form-group.col-sm-2
+                    label(for='clientName') Client Name: 
+                    input#clientName.form-control.form-control-sm(type='text' placeholder='Client Name' name='clientName'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.clientName)     
+                .form-group.col-sm-2
+                    label(for='active') Active: 
+                    input#active.form-control.form-control-sm(type='text' placeholder='Active' name='active'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.active)   
+                .form-group.col-sm-2
+                    label(for='conditions') Conditions: 
+                    input#conditions.form-control.form-control-sm(type='text' placeholder='Conditions' name='conditions'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.conditions ? tripRequestSearchResult[0].ClientProfileModel.conditions.toString() : '-')               
+                .form-group.col-sm-2
+                    label(for='mobAids') Mobility Aid: 
+                    input#clientName.form-control.form-control-sm(type='text' placeholder='Mobility Aid' name='mobAids'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.mobAids ? tripRequestSearchResult[0].ClientProfileModel.mobAids.toString() : '-')     
+                .form-group.col-sm-2
+                    label(for='prefSpaceType') Space Type: 
+                    input#prefSpaceType.form-control.form-control-sm(type='text' placeholder='Space Type' name='prefSpaceType'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.prefSpaceType ? tripRequestSearchResult[0].ClientProfileModel.prefSpaceType.toString() : '-')    
+            
+            .form-row
+                .form-group.col-sm-1
+                    label(for='tripRequestId') TripH.ID: 
+                    input#tripRequestId.form-control.form-control-sm(type='text' placeholder='tripRequestId' name='tripRequestId'  readonly required='true' value=tripRequestSearchResult[0].id)               
+                .form-group.col-sm-1
+                    label(for='bookingId') Bkg.ID: 
+                    input#bookingId.form-control.form-control-sm(type='text' placeholder='bookingId' name='bookingId'  readonly required='true' value=tripRequestSearchResult[0].bookingId) 
+                
+                .form-group.col-sm-2
+                    label(for='daysOfWeekRequested') Days-Week: 
+                    input#daysOfWeekRequested.form-control.form-control-sm(type='text' placeholder='Days-Week' name='daysOfWeekRequested'  readonly required='true' value=tripRequestSearchResult[0].daysOfWeekRequested.toString())
+                .form-group.col-sm-2
+                    label(for='tripTime') Trip/Appointment Time: 
+                    input#tripTime.form-control.form-control-sm(type='text' placeholder='Time' name='tripTime'  readonly required='true' value=(tripRequestSearchResult[0].tripTime === null ? '--:--:--' : tripRequestSearchResult[0].tripTime) + ' / ' + 
+                        (tripRequestSearchResult[0].appointmentTime === null ? '--:--:--' : tripRequestSearchResult[0].appointmentTime) )    
+                .form-group.col-sm-2
+                    label(for='dateAdded') Date Added: 
+                    input#dateAdded.form-control.form-control-sm(type='text' placeholder='Date Added' name='dateAdded'  readonly required='true' value=tripRequestSearchResult[0].DateAdded)  
+                .form-group.col-sm-2
+                    label(for='dateCompleted') Date Completed: 
+                    input#dateCompleted.form-control.form-control-sm(type='text' placeholder='Date Completed' name='dateCompleted'  readonly required='true' value=tripRequestSearchResult[0].dateCompleted)  
+                .form-group.col-sm-2
+                    label(for='status') Status: 
+                    input#status.form-control.form-control-sm(type='text' placeholder='Enter Status' name='status'  readonly required='true' value=tripRequestSearchResult[0].status)  
+            .form-row
+                .form-group.col-sm-2
+                    label(for='pName') Origin Name/Unit: 
+                    input#pName.form-control.form-control-sm(type='text' placeholder='Origin Name/Unit' name='pName'  readonly required='true' value=tripRequestSearchResult[0].pName + ' , ' + tripRequestSearchResult[0].pUnit)     
+                .form-group.col-sm-4
+                    label(for='address') Origin Address: 
+                    input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=tripRequestSearchResult[0].pAddr + ', ' + tripRequestSearchResult[0].pCity  + ', ' +  tripRequestSearchResult[0].pZip )
+                .form-group.col-sm-2
+                    label(for='dName') Destination Name/Unit: 
+                    input#pName.form-control.form-control-sm(type='text' placeholder='Dest. Name/Unit' name='pName'  readonly required='true' value=tripRequestSearchResult[0].dName + ' , ' + tripRequestSearchResult[0].dUnit)     
+                .form-group.col-sm-4
+                    label(for='address') Destination Address: 
+                    input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=tripRequestSearchResult[0].dAddr + ', ' + tripRequestSearchResult[0].dCity  + ', ' +  tripRequestSearchResult[0].dZip ) 
+        
+            hr
+            .durationdiv
+                    label.Tripduration(for='tripTotalTime') Trip Total Duration (min):
+                    input.form-control.form-control-trip.durationinput(type='text' readonly id='tripTotalTime' value=ADAPathwaySearchResult[0].tripDurationTime placeholder='Enter Estimated Total Trip Duration')
+                        
+        form#instructionForm(method='POST' action='')
+        
+            .accordion.container-fluid.card
+                each leg, i in ADAPathwaySearchResult[0].itineraryInstructionLegs
+                    if leg.mode === 'WALK'
+                        .card-header.card.css
+                            .row.mode
+                                .col-8
+                                    h4.feed Walk
+                                        iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" readonly class="zooom" onClick='zoomSegment('+i+','+'"WALK"'+')')                             
+                                   
+                            .form-row
+                                .form-group.col-sm-4
+                                    label(for='leg[][from]') From
+                                    input.form-control.form-control-sm(id='leg[][from]' readonly name=i+'.from' type='text' value=leg.from placeholder='Enter from address')
+                                .form-group.col-sm-2
+                                    label(for='leg.[mode]') Mode
+                                    input.form-control.form-control-sm(id='leg[][mode]' readonly name=i+'.mode' type='text' value=leg.mode)
+                                .form-group.col-sm-2
+                                    label(for='leg.[walkDistance]') Dist.Total (ft.)
+                                    input.form-control.form-control-sm(id='leg[][walkDistance]' readonly name=i+'.walkDistance' type='text' value=leg.walkDistance)
+                                .form-group.col-sm-4
+                                    label(for='leg[][to]') To
+                                    input.form-control.form-control-sm(id='leg[][to]' readonly name=i+'.to' type='text' value=leg.to placeholder='Enter to address')
+                            .card-body.fullwidth.container-fluid(style="background-color:#f7f7f7;")
+                                    each step, s in leg.steps
+                                        .form-row
+                                            .form-group.col-sm-1
+                                                label(for='leg[][steps][][relativeDirection]' style='font-size:12px;') Instruction
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][steps][][relativeDirection]' readonly name=i+'.steps.'+s+'.relativeDirection' type='text' value=step.relativeDirection placeholder='Enter Instruction')
+                                            .form-group.col-sm-1
+                                                label(for='leg[][steps][][absoluteDirection]' style='font-size:12px;') Direction
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][steps][][absoluteDirection]' readonly name=i+'.steps.'+s+'.absoluteDirection' type='text' value=step.absoluteDirection placeholder='North, South, East, West')
+                                            .form-group.col-sm-2
+                                                label(for='leg[][steps][][streetName]' style='font-size:12px;') Street-Name
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][steps][][streetName]' readonly name=i+'.steps.'+s+'.streetName' type='text' value=step.streetName placeholder='Enter street name')
+                                            .form-group.col-sm-1
+                                                label(for='leg[][steps][][distance]' style='font-size:12px;') Distance(ft.)
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][steps][][distance]' readonly name=i+'.steps.'+s+'.distance' type='text' value=step.distance)
+                                            .form-group.col-sm-1
+                                                label(for='leg[][steps][][slope]' style='font-size:12px;') Slope
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][steps][][slope]' readonly name=i+'.steps.'+s+'.slope' type='text' value=step.slope placeholder='X ~ Y %')
+                                            .form-group.col-sm-2
+                                                label(for='leg[][steps][][barriers]' style='font-size:12px;') Barriers
+                                                input.form-control.form-control-sm.instructionfont(readonly id='leg[][steps][][barriers]' name=i+'.steps.'+s+'.barriers' value=step.barriers)
+                                            .form-group.col-sm-3
+                                                label(for='leg[][steps][][notes]' style='font-size:12px;') Notes
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][steps][][notes]' readonly name=i+'.steps.'+s+'.notes' type='text' value=step.notes)
+                                            .form-group.col-xs-1
+                                                button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button' style='font-size:16px;' title='zoom to map' onClick='zoomMapTo('+i+','+s+','+'"WALK"'+')')
+                                                    iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" class="zooom")
+                                            
+                        hr(color='#407DE0' size='10')
+                    else if (leg.mode === 'BUS' || leg.mode === 'TRAM')
+                        .card-header.card.css
+                            .row.mode
+                                .col-8
+                                    h4.feed Bus/Tram
+                                        iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" class="zooom" onClick='zoomSegment('+i+','+'"BUS"'+')')
+                                    
+                            .form-row
+                                .form-group.col-sm-5
+                                    label(for='leg[][from]') Depart
+                                    input.form-control.form-control-sm(id='leg[][from]' readonly name=i+'.from' type='text' value=leg.from placeholder='Enter depart address')
+                                .form-group.col-sm-2
+                                    label(for='leg[][mode]') Mode
+                                    input.form-control.form-control-sm(id='leg[][mode]' readonly name=i+'.mode' type='text' value=leg.mode)
+                                .form-group.col-sm-5
+                                    label(for='leg[][to]') Arrive
+                                    input.form-control.form-control-sm(id='leg[][to]' readonly name=i+'.to' type='text' value=leg.to placeholder='Enter arrive address')
+                        .fullwidth.container-fluid(style="background-color:#f7f7f7;")
+                                .form-row
+                                    .form-group.col-sm-5
+                                        .form-row
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopFrom][name]' style='font-size:12px;') Depart-Stop-ID
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][busStopFrom][name]' readonly name=i+'.busStopFrom.name' type='text' value=leg.busStopFrom.name placeholder='Enter depart ID')
+                                            .form-group.col-sm-2
+                                                label(for='leg[][busStopFrom][stopTimeWeekday]' style='font-size:12px;') Weekdays
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][busStopFrom][stopTimeWeekdays]' readonly class=i+'bus-stop-from-weekdays' name=i+'.busStopFrom.stopTimeWeekdays' type='text' value=leg.busStopFrom.stopTimeWeekdays placeholder="Stop time" onclick='openModal("'+i+'bus-stop-from-weekdays", "'+leg.busStopFrom.name+'", "'+leg.busStopTo.name+'", "'+leg.from+'", "'+leg.to+'", "'+leg.busNumber+'", "'+i+'")')
+                                            .form-group.col-sm-2
+                                                label(for='leg[][busStopFrom][stopTimeSaturday]' style='font-size:12px;') Saturday
+                                                input.form-control.form-control-sm.instructionfont(type='text' id='leg[][busStopFrom][stopTimeSaturday]' readonly class=i+'bus-stop-from-saturday' name=i+'.busStopFrom.stopTimeSaturday' value=leg.busStopFrom.stopTimeSaturday placeholder="Stop time" onclick='openModal("'+i+'bus-stop-from-saturday", "'+leg.busStopFrom.name+'", "'+leg.busStopTo.name+'", "'+leg.from+'", "'+leg.to+'", "'+leg.busNumber+'", "'+i+'")')
+                                            .form-group.col-sm-2
+                                                label(for='stopTimeSunday' style='font-size:12px;') Sunday 
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][busStopFrom][stopTimeSunday]' class=i+'bus-stop-from-sunday' readonly name=i+'.busStopFrom.stopTimeSunday' type='text' value=leg.busStopFrom.stopTimeSunday placeholder="Stop time" onclick='openModal("'+i+'bus-stop-from-sunday", "'+leg.busStopFrom.name+'", "'+leg.busStopTo.name+'", "'+leg.from+'", "'+leg.to+'", "'+leg.busNumber+'", "'+i+'")')
+                                            .form-group.col-sm-1
+                                                button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button' style='font-size:16px;' title='zoom to map' onClick='zoomMapTo('+i+','+'""'+','+'"busStopFrom"'+')')
+                                                    iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" class="zooom")
+                    
+                                        .form-row
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopFrom][shelter]' style='font-size:13px;') Shelter
+                                                input.form-control.form-control-sm.instructionfont(type='select' readonly class='selectpicker' id='leg[][busStopFrom][shelter]' name=i+'.busStopFrom.shelter' value=leg.busStopFrom.shelter)
+
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopFrom][bench]' style='font-size:13px;') Bench
+                                                input.form-control.form-control-sm.instructionfont(type='select' readonly class='selectpicker' id='leg[][busStopFrom][bench]' name=i+'.busStopFrom.bench' value=leg.busStopFrom.bench)
+
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopFrom][light]' style='font-size:13px;') Light
+                                                input.form-control.form-control-sm.instructionfont(type='select' readonly class='selectpicker' id='leg[][busStopFrom][light]' name=i+'.busStopFrom.light' value=leg.busStopFrom.light)
+
+                                        .form-row
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopFrom][barriers]' style='font-size:13px;') Barriers
+                                                input.form-control.form-control-sm.instructionfont(class='selectpicker' readonly id='leg[][busStopFrom][barriers]' name=i+'.busStopFrom.barriers' value=leg.busStopFrom.barriers)
+
+                                            .form-group.col-sm-6
+                                                label(for='leg[][busStopFrom][notes]' style='font-size:13px;') Notes
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][busStopFrom][notes]' readonly name=i+'.busStopFrom.notes' type='text' value=leg.busStopFrom.notes)
+                                        
+                                    .form-group.col-sm-2
+                                        .form-group.col-sm-10
+                                            label(for='leg[][busNumber]' style='font-size:13px;') Route name
+                                            input.form-control.form-control-sm.instructionfont(id='leg[][busNumber]' readonly name=i+'.busNumber' type='text' value=leg.busNumber)
+                                    
+                                    .form-group.col-sm-5
+                                        .form-row
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopTo][name]' style='font-size:12px;') Arrive-Stop-ID
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][busStopTo][name]' readonly name=i+'.busStopTo.name' type='text' value=leg.busStopTo.name placeholder='Enter arrive stop ID')
+                                            .form-group.col-sm-2
+                                                label(for='leg[][busStopTo][stopTimeWeekdays]' style='font-size:12px;') Weekdays
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][busStopTo][stopTimeWeekdays]' readonly name=i+'.busStopTo.stopTimeWeekdays' type='text' value=leg.busStopTo.stopTimeWeekdays placeholder="Stop time" )
+                                            .form-group.col-sm-2
+                                                label(for='leg[][busStopTo][stopTimeSaturday]' style='font-size:12px;') Saturday
+                                                input.form-control.form-control-sm.instructionfont(type='text' id='leg[][busStopTo][stopTimeSaturday]' readonly name=i+'.busStopTo.stopTimeSaturday' value=leg.busStopTo.stopTimeSaturday placeholder="Stop time")
+                                            .form-group.col-sm-2
+                                                label(for='leg[][busStopTo][stopTimeSunday]' style='font-size:12px;') Sunday 
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][busStopTo][stopTimeSunday]' readonly name=i+'.busStopTo.stopTimeSunday' type='text' value=leg.busStopTo.stopTimeSunday placeholder="Stop time")
+                                            .form-group.col-sm-1
+                                                button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button' style='font-size:16px;' title='zoom to map' onClick='zoomMapTo('+i+','+'""'+','+'"busStopTo"'+')')
+                                                    iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" class="zooom")
+                    
+                                        .form-row
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopTo][shelter]' style='font-size:13px;') Shelter
+                                                input.form-control.form-control-sm.instructionfont(type='select' readonly class='selectpicker' id='leg[][busStopTo][shelter]' name=i+'.busStopTo.shelter' value=leg.busStopTo.shelter)
+    
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopTo][bench]' style='font-size:13px;') Bench
+                                                input.form-control.form-control-sm.instructionfont(type='select' readonly class='selectpicker' id='leg[][busStopTo][bench]' name=i+'.busStopTo.bench' value=leg.busStopTo.bench)
+
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopTo][light]' style='font-size:13px;') Light
+                                                input.form-control.form-control-sm.instructionfont(type='select' readonly class='selectpicker' id='leg[][busStopTo][light]' name=i+'.busStopTo.light' value=leg.busStopTo.light)
+                              
+                                        .form-row
+                                            .form-group.col-sm-3
+                                                label(for='leg[][busStopTo][barriers]' style='font-size:13px;') Barriers
+                                                input.form-control.form-control-sm.instructionfont(class='selectpicker' readonly id='leg[][busStopTo][barriers]' name=i+'.busStopTo.barriers' value=leg.busStopTo.barriers)
+
+                                            .form-group.col-sm-6
+                                                label(for='leg[][busStopTo][notes]' style='font-size:13px;') Notes
+                                                input.form-control.form-control-sm.instructionfont(id='leg[][busStopTo][notes]' readonly name=i+'.busStopTo.notes' type='text' value=leg.busStopTo.notes)
+                        hr(color='#407DE0' size='10')
+                
+        .form-row(id='viewButtons')
+            .form-group.col-xs-2
+                button.primarybutton(type='button' onclick='drawRoute(JSONrouteData)') Load-Map
+            .form-group.col-sm-2
+                button.secondarybutton(type='button' onclick='clearMap()') Clear
+            .form-group.col-xs-2
+                button.secondarybutton(onclick='exportPDF();')
+                    i(class='fa fa-file-pdf-o') &nbsp;PDF
+            .form-group.col-xs-2
+                button.secondarybutton(onclick='exportHTML();')
+                    i(class='fa fa-file-text') &nbsp;HTML
+      
+        .mapExport(id='mapExport')      
+            #map
+            script(src='/javascripts/leafletOTP.js')

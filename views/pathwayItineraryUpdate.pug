@@ -1,0 +1,1000 @@
+extends layout
+
+block content
+    
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/pathwayItinerary/list').parentbreadcrumb Pathway List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Update Pathway Itinerary Transit Instruction
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+    
+    script.
+        const routeData = !{JSON.stringify(ADAPathwaySearchResult[0].pathwayItinerary)};
+        let JSONrouteData;
+        let selectedItinNumber;
+        let itin;
+        if (routeData) {
+            JSONrouteData = JSON.parse(routeData);
+            selectedItinNumber = !{ADAPathwaySearchResult[0].selectedItinNumber};
+            itin = JSONrouteData.plan.itineraries[selectedItinNumber];
+        } else {
+            JSONrouteData = null;
+            selectedItinNumber = !{ADAPathwaySearchResult[0].selectedItinNumber};
+            itin = null;
+        }
+
+        let indexLegParam;
+        let tripRequestIdParam;
+        let itinlength;
+
+        function tripRequestHistoryURL() {
+            return window.location.origin + "/tripRequests/update" + "?id=" + !{tripRequestSearchResult[0].id};
+        }
+
+        function selectLeg(i, mode){
+            indexLegParam = i;
+            modeParam = mode ; 
+            tripRequestIdParam = document.getElementById("tripRequestId").value;
+        }
+
+        function removeLegBtn(i, mode, length){
+            
+            if(length > 1) {
+                itinLength = length;
+                indexLegParam = i;
+                modeParam = mode ; 
+                tripRequestIdParam = document.getElementById("tripRequestId").value;
+            } else {
+                $('#other-leg').attr({hidden: true });
+                $('#last-leg').attr({hidden: false });
+                document.getElementById("removeLegButton").disabled = true;
+            }
+
+        }
+
+        function addWalkLeg(){
+            let numberOfStepsParam = document.getElementById("numOfSteps").value;
+            const addRemoveLegParam = "ADD";
+            addLegStep(tripRequestIdParam,modeParam,indexLegParam, numberOfStepsParam ,addRemoveLegParam );
+            $('#walkLegModal').modal('toggle');
+        }
+
+        function addBusLeg(){
+            let numberOfStepsParam = 0;
+            const addRemoveLegParam = "ADD";
+            addLegStep(tripRequestIdParam,modeParam,indexLegParam, numberOfStepsParam ,addRemoveLegParam );
+            $('#busLegModal').modal('toggle');
+        }
+
+        function removeLeg(i,mode){
+            let numberOfStepsParam = 0;
+            const addRemoveLegParam = "REMOVE";
+            addLegStep(tripRequestIdParam,modeParam,indexLegParam, numberOfStepsParam ,addRemoveLegParam );
+            $('#removeLegModal').modal('toggle');
+        }
+
+        function addFieldReview(i, s, mode) {
+            let urlAddFieldReview;
+            let tripRequestId = #{tripRequestSearchResult[0].id};
+            let legAddress;
+            
+            if (itin) {
+                if (mode === 'WALK') { 
+                    urlAddFieldReview = '../fieldReviews/create?tripRequestsId=' + tripRequestId + '&lat=' + itin.legs[i].steps[s].lat + '&lon=' + itin.legs[i].steps[s].lon + '&leg=' + i + '&step=' + s + '&mode=' + mode ; 
+                } else if (mode === 'busStopFrom') {
+                    urlAddFieldReview = '../fieldReviews/create?tripRequestsId=' + tripRequestId + '&lat=' + itin.legs[i].from.lat + '&lon=' + itin.legs[i].from.lon + '&leg=' + i + '&step=-1' + '&mode=' + mode ; 
+                } else if (mode === 'busStopTo') {
+                    urlAddFieldReview = '../fieldReviews/create?tripRequestsId=' + tripRequestId + '&lat=' + itin.legs[i].to.lat + '&lon=' + itin.legs[i].to.lon + '&leg=' + i + '&step=-1' + '&mode=' + mode ; 
+                }
+                window.open(urlAddFieldReview, "socialPopupWindow",
+                    "location=no,width=1100,height=610,scrollbars=yes,top=100,left=800,resizable=no,titlebar=no");
+
+            } else {
+                if (mode === 'WALK') {
+                    legAddress = !{JSON.stringify(ADAPathwaySearchResult[0].itineraryInstructionLegs)}[i].from;
+                } else if (mode ==='busStopFrom') {
+                    legAddress = !{JSON.stringify(ADAPathwaySearchResult[0].itineraryInstructionLegs)}[i].from;
+                } else if (mode === 'busStopTo') {
+                    legAddress = !{JSON.stringify(ADAPathwaySearchResult[0].itineraryInstructionLegs)}[i].to;
+                }
+               
+                if (legAddress != '') {
+                    geocodeAddressOnly(legAddress).then(geocodeResult => {
+                        if (mode === 'WALK') { 
+                            urlAddFieldReview = '../fieldReviews/create?tripRequestsId=' + tripRequestId + '&lat=' + geocodeResult[0][0]['lat'] + '&lon=' + geocodeResult[0][0]['lon'] + '&leg=' + i + '&step=' + s + '&mode=' + mode ; 
+                        } else if (mode === 'busStopFrom') {
+                            urlAddFieldReview = '../fieldReviews/create?tripRequestsId=' + tripRequestId + '&lat=' + geocodeResult[0][0]['lat'] + '&lon=' + geocodeResult[0][0]['lon'] + '&leg=' + i + '&step=-1' + '&mode=' + mode ; 
+                        } else if (mode === 'busStopTo') {
+                            urlAddFieldReview = '../fieldReviews/create?tripRequestsId=' + tripRequestId + '&lat=' + geocodeResult[0][0]['lat'] + '&lon=' + geocodeResult[0][0]['lon'] + '&leg=' + i + '&step=-1' + '&mode=' + mode ; 
+                        }
+                        window.open(urlAddFieldReview, "socialPopupWindow",
+                            "location=no,width=1100,height=610,scrollbars=yes,top=100,left=800,resizable=no,titlebar=no");
+
+                    }).catch(function(err) {
+                        alert('geocoding error: ' + err.toString());
+                    });
+                    
+                } else {
+                    alert('Address is empty, please fill address and save/update form');
+                }
+            }
+
+
+        }
+
+        function updatedADAPathwayRecord() {
+            let transitInstructionReturnForm = serializeInstructionFormRecord();
+            let tripDurationTime = document.getElementById('tripTotalTime').value;
+            const ADAPathwayRecordId = !{JSON.stringify(ADAPathwaySearchResult[0].id)};
+            return [transitInstructionReturnForm, ADAPathwayRecordId, tripDurationTime]; 
+        }
+
+        function zoomSegment(i, mode) {
+            $([document.documentElement, document.body]).animate({scrollTop: $('#map').offset().top}, 2000);
+            if (itin) {
+                if (mode === 'WALK') {
+                    thisleglat = (itin.legs[i].steps[0].lat);
+                    thisleglon = (itin.legs[i].steps[0].lon);
+                    corner1 = L.latLng(thisleglat, thisleglon);
+                    if ( i === 0 ){
+                        nextleglat = (itin.legs[i+1].from.lat);
+                        nextleglon = (itin.legs[i+1].from.lon);
+                    }
+                    else 
+                    nextleglat = (itin.legs[i].to.lat);
+                    nextleglon = (itin.legs[i].to.lon);
+                    corner2 = L.latLng(nextleglat, nextleglon);
+                    bounds = L.latLngBounds(corner1, corner2);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['BingAerialLabels'].addTo(map);
+                    map.fitBounds(bounds, {padding: [40,40]});
+                }
+                else if (mode === 'BUS') {
+                    lat1 = (itin.legs[i].from.lat);
+                    lon1 = (itin.legs[i].from.lon);
+                    lat2 = (itin.legs[i].to.lat);
+                    lon2 = (itin.legs[i].to.lon);
+                    corner1 = L.latLng(lat1, lon1);
+                    corner2 = L.latLng(lat2, lon2);
+                    bounds = L.latLngBounds(corner1, corner2);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['BingAerialLabels'].addTo(map);
+                    map.fitBounds(bounds, {padding: [40,40]});
+                }
+            }
+        }
+
+        function openModal(id, fromStopId, toStopId, fromStop, toStop, busNumber, indexLeg){
+            
+            function AMPMTimeConverter(time24HourFormat) {
+                let hours;
+                let minutes;
+                let seconds;
+                let meridian;
+                let timeSplit = time24HourFormat.split(':');
+
+                hours = timeSplit[0];
+                minutes = timeSplit[1];
+                seconds = timeSplit[2];
+                if (hours > 12) {
+                    meridian = 'PM';
+                    hours -= 12;
+                } else if (hours < 12) {
+                    meridian = 'AM';
+                    if (hours == 0) {
+                    hours = 12;
+                    }
+                } else {
+                    meridian = 'PM';
+                }
+                return `${hours}:${minutes}:${seconds} ${meridian}`;
+            }
+
+            let from_departTime;
+
+            if (itin) {
+                from_departTime = new Date(itin.legs[indexLeg].from.departure).toLocaleTimeString("en-US");
+            } else {
+                from_departTime = AMPMTimeConverter(!{JSON.stringify(tripRequestSearchResult[0].tripTime)});
+            }
+
+            $('#staticBackdrop').modal({
+                show: true,
+            });
+          
+            $("#inputId").val(id);
+            $("#fromStopId").val(fromStopId);
+            $("#toStopId").val(toStopId);
+            $("#fromStop").val(fromStop);
+            $("#toStop").val(toStop);
+            $("#busNumber").val(busNumber);
+
+            $('#staticBackdropLabel').html(`<h5><b>Stop Time Picker:- </b> Stop ID: ${fromStopId}, Bus Route: ${busNumber}, Origin: ${fromStop}</h5>`);
+
+            $("#departTime").val(from_departTime);
+
+            $('#zero-list').empty();
+            $('#one-list').empty();
+            $('#two-list').empty();
+
+            $('.dropright').attr({ hidden: true });
+            $('#selectedTime').attr({hidden: false });
+            $('#datepicker').val("");
+        }
+
+       async function getDate(e) {
+            $('#zero-list').empty();
+            $('#one-list').empty();
+            $('#two-list').empty();
+            const date= e.target.value
+            const stopDate = date.split('-').join('');
+            const fromStopId = $("#fromStopId").val();
+            const toStopId = $("#toStopId").val();
+            const busNumber = $("#busNumber").val();
+            const getTime = $('#departTime').val().trim().split(' ');
+            const amOrPm = getTime[1];
+            const departTime = getTime[0] + ' ' + amOrPm.toLowerCase();
+            
+            const otpEndpoint = $('#otpEndpoint').val()
+            const apiUrl = `${otpEndpoint.split('/plan')[0]}/index/stops/${fromStopId}/stoptimes/${stopDate}`
+            
+            let data;
+            
+            try {
+
+                data = await $.get(apiUrl);
+
+                const matchedBusNumberList = getBusList(data, busNumber);
+                const allStopTimes = getStopTime(matchedBusNumberList, fromStopId, toStopId, departTime);
+
+                const convertedTimesList = convertedTimes(allStopTimes);
+                const sortedTimes = convertedTimesList.sort((a,b) => new Date('2021/01/01' + ' ' + a) - new Date('2021/01/01' + ' ' + b));
+
+                $('.dropright').attr({ hidden: false });
+                const [zeroTo8, eightTo16, sixteenTo24] = splitTime(sortedTimes);
+
+                const zeroTo8ul = document.createElement("ul");
+                const eightTo16ul = document.createElement("ul");
+                const sixteenTo24ul = document.createElement("ul");
+
+                zeroTo8ul.innerHTML = '<br/>';
+                eightTo16ul.innerHTML = '<br/>';
+                sixteenTo24ul.innerHTML = '<br/>';
+
+                let zeroTo8span;
+                let eightTo16span;
+                let sixteenTo24span;
+
+
+                let zeroDivs = $('#zero-list-div');
+                let oneDivs = $('#one-list-div');
+                let twoDivs = $('#two-list-div');
+
+                enableDiv(zeroDivs);
+                enableDiv(oneDivs);
+                enableDiv(twoDivs);
+
+                if(zeroTo8.length > 0) {
+                    zeroTo8ul.setAttribute('class', 'list-group');
+
+                    for(let x=0; x < zeroTo8.length; x++) {
+                        zeroTo8span = document.createElement("span");
+                        zeroTo8span.setAttribute('id', `span-${x}-zte`);
+                        zeroTo8span.innerHTML = `<li id="button-${x}-zte" class="list-group-item" onClick="selectTime(event)">${zeroTo8[x]}</li>`;
+                        zeroTo8ul.appendChild(zeroTo8span);
+                        zeroTo8span = undefined;
+                    }
+
+
+                    $('#zero-list').append(zeroTo8ul);
+
+                } else {
+                    disablesDiv(zeroDivs);
+                }
+
+                if(eightTo16.length > 0) {
+                    eightTo16ul.setAttribute('class', 'list-group');
+
+                    for(let x=0; x<eightTo16.length; x++) {
+                        eightTo16span = document.createElement("span");
+                        eightTo16span.setAttribute('id', `span-${x}-eto`);
+                        eightTo16span.innerHTML = `<li id="button-${x}-eto" class="list-group-item" onClick="selectTime(event)">${eightTo16[x]}</li>`;
+                        eightTo16ul.appendChild(eightTo16span);
+                        eightTo16span = undefined;
+                    }
+
+                    $('#one-list').append(eightTo16ul);
+                } else {
+                    disablesDiv(oneDivs);
+                }
+
+                if(sixteenTo24.length > 0) {
+                    sixteenTo24ul.setAttribute('class', 'list-group');
+
+                    for(let x=0; x<sixteenTo24.length; x++) {
+                        sixteenTo24span = document.createElement("span");
+                        sixteenTo24span.setAttribute('id', `span-${x}-stt`);
+                        sixteenTo24span.innerHTML = `<li id="button-${x}-stt" class="list-group-item" onClick="selectTime(event)">${sixteenTo24[x]}</li>`;
+                        sixteenTo24ul.appendChild(sixteenTo24span);
+                        sixteenTo24span = undefined;
+                    }
+
+                    $('#two-list').append(sixteenTo24ul);
+                } else {
+                    disablesDiv(twoDivs);
+                }
+          } catch(e) {
+                $('.dropright').attr({ hidden: false });
+                let zeroDivs = $('#zero-list-div');
+                let oneDivs = $('#one-list-div');
+                let twoDivs = $('#two-list-div');
+                
+                disablesDiv(zeroDivs);
+                disablesDiv(oneDivs);
+                disablesDiv(twoDivs);
+
+          }
+        }
+
+        function disablesDiv(divs) {
+            let children;
+            for(let div of divs) {
+                children = div.children;
+                for(child of children) {
+                    child.disabled = true;
+                }
+            }
+        }
+
+        function enableDiv(divs) {
+            let children;
+            for(let div of divs) {
+                children = div.children;
+                for(child of children) {
+                    child.disabled = false;
+                }
+            }
+        }
+
+        function getBusList(data, busNumber) {
+            let matchedBusNumberList = [];
+            let dataBusNumber;
+            for(let i=0; i< data.length; i++){
+                dataBusNumber = data[i].pattern.desc.split('to')[0];
+                if(busNumber == dataBusNumber.trim()) {
+                    matchedBusNumberList.push(data[i]);
+                }
+            }
+            return matchedBusNumberList;
+        }
+
+        function getStopTime(matchedBusNumberList, fromStopId, toStopId, departTime){
+            let allStopTimes = [];
+            let pattern;
+            let routePattern;
+            let originPattern;
+            let originBusStopId;
+            let destPattern;
+            let destBusStopId;
+            let viaRoute;
+            let viaBusStopId;
+            let times;
+            let epochDay;
+            let arrival;
+            let date;
+            let convertedTime;
+            
+            for(let x=0; x<matchedBusNumberList.length; x++) {
+                pattern = matchedBusNumberList[x].pattern.desc.split(' to ')[1];
+                routePattern = pattern.split(' from ') ? pattern.split(' from ') : pattern;
+                
+                originPattern = "";
+                originBusStopId = "";
+                destPattern = "";
+                destBusStopId = "";
+                viaRoute = "";
+                viaBusStopId = "";
+                
+                if(routePattern.length == 1) {
+                    destPattern = routePattern[0].split('(')[0].trim();
+                    destBusStopId = routePattern[0].split('(')[1].split(')')[0].trim();
+                } else if(routePattern.length == 2) {
+                    destPattern = routePattern[0].split('(')[0].trim();
+                    destBusStopId = routePattern[0].split('(')[1].split(')')[0].trim();
+                    
+                    originPattern = routePattern[1].split('(')[0].trim();
+                    originBusStopId = routePattern[1].split('(')[1].split(')')[0].trim();
+                    
+                    if(routePattern[1].split(' via ') == true) {
+                        viaRoute = routePattern[1].split('via')[1].split('(')[0].trim();
+                        viaBusStopId = routePattern[1].split('via')[1].split('(')[1].split(')')[0].trim();
+                    }
+                }
+                if(matchedBusNumberList[x].times.length > 0) {
+                    if(originBusStopId == fromStopId.trim() && destBusStopId == toStopId.trim()) {
+                        allStopTimes.push(...matchedBusNumberList[x].times);
+                    } else if(originBusStopId == fromStopId.trim()) { 
+                        allStopTimes.push(...matchedBusNumberList[x].times);
+                    }  else if( destBusStopId == toStopId.trim()) {
+                        allStopTimes.push(...matchedBusNumberList[x].times);
+                    } else if(viaBusStopId == fromStopId.trim()){
+                        allStopTimes.push(...matchedBusNumberList[x].times);
+                    } else if(viaBusStopId == toStopId.trim()) {
+                        allStopTimes.push(...matchedBusNumberList[x].times);
+                    } else {
+                        times = matchedBusNumberList[x].times;
+                        
+                        for(let t=0; t<times.length; t++) {
+                            epochDay = times[t].serviceDay;
+                            arrival = times[t].scheduledDeparture;
+                            date = new Date(0);
+                            date.setUTCSeconds(epochDay + arrival);
+                            convertedTime = date.toLocaleString('en-GB', { hour:'numeric', minute:'numeric', hour12:true });
+                            if(convertedTime != departTime){
+                               continue
+                            } else {
+                                allStopTimes.push(...matchedBusNumberList[x].times);
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    continue;
+                }
+            }
+            
+            return allStopTimes;
+        }
+
+        function convertedTimes(allStopTimes) {
+            let convertedTimesList = [];
+            let epochDay;
+            let arrival;
+            let date;
+
+            for(let j=0; j< allStopTimes.length; j++) {
+                epochDay = allStopTimes[j].serviceDay;
+                arrival = allStopTimes[j].scheduledDeparture;
+                date = new Date(0);
+                date.setUTCSeconds(epochDay + arrival);
+                convertedTimesList.push(date.toLocaleString('en-GB', { hour:'numeric', minute:'numeric', hour12:true }));
+            }
+
+            return convertedTimesList;
+        }
+
+        function splitTime(sortedTimes) {
+            let zeroTo8  = [];
+            let eightTo16 = [];
+            let sixteenTo24 = [];
+            let hour;
+            let hour12;
+                                                
+            for(let z=0; z< sortedTimes.length; z++) {
+                hour = new Date('2021/01/01 ' + sortedTimes[z]).getHours();
+                
+                if(hour >=0 && hour <8){
+                    if(hour == 0) {
+                        hour12 = sortedTimes[z].split(':');
+                        hour12.splice(0,1,"12");
+                        zeroTo8.push(hour12.join(':'));
+                    } else {
+                        zeroTo8.push(sortedTimes[z]);
+                    }
+                } else if(hour >= 8 && hour <16) {
+                    eightTo16.push(sortedTimes[z]);
+                } else if(hour >= 16 && hour < 24) {
+                    sixteenTo24.push(sortedTimes[z]);
+                }
+            }
+
+            return [zeroTo8, eightTo16, sixteenTo24];
+        }
+
+        function selectTime(e) {
+            e.preventDefault();
+            $('#selectedTime').attr({ hidden:false });
+            $('#selectedTime').val(`${e.target.innerHTML}`);
+        }
+
+        function saveTime(e) {
+            const getDate = $('#selectedTime').val();
+            const inputId = $('#inputId').val();
+            
+            $(`.${inputId}`).val(getDate);
+        }
+  
+        function zoomMapTo(i, s, mode) {
+            $([document.documentElement, document.body]).animate({scrollTop: $('#map').offset().top}, 2000);
+            if (itin) {
+                if (mode === 'WALK') {
+                    latLon = [parseFloat(itin.legs[i].steps[s].lat), parseFloat(itin.legs[i].steps[s].lon)];
+                    map.removeLayer(overlayMaps['Transit-Stops']);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['BingAerialLabels'].addTo(map);
+                    map.setView(latLon, 20); 
+                } else if (mode === 'busStopFrom'){
+                    latLon = [parseFloat(itin.legs[i].from.lat), parseFloat(itin.legs[i].from.lon)];
+                    map.removeLayer(overlayMaps['Transit-Stops']);
+                    map.removeLayer(baseMaps['BingAerialLabels']);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['OSM-Carto'].addTo(map);
+                    map.setView(latLon, 20);  
+                } else if (mode === 'busStopTo'){
+                    latLon = [parseFloat(itin.legs[i].to.lat), parseFloat(itin.legs[i].to.lon)];
+                    map.removeLayer(overlayMaps['Transit-Stops']);
+                    map.removeLayer(baseMaps['BingAerialLabels']);
+                    overlayMaps['Transit-Stops'].addTo(map);
+                    baseMaps['OSM-Carto'].addTo(map);
+                    map.setView(latLon, 20);     
+                }
+            }
+
+        }
+
+        function addLegStep(tripRequestIdParam, modeParam, indexLegParam, numberOfStepsParam, addRemoveLegParam) {
+            let data = {
+                    tripRequestId: tripRequestIdParam,
+                    mode: modeParam, //- 'WALK'/'BUS'/'TRAM'
+                    indexLeg: indexLegParam,
+                    numberOfSteps: numberOfStepsParam,
+                    addRemoveLeg: addRemoveLegParam //- 'ADD'/'REMOVE'
+                };
+            let url = `${new URL(location.href).origin}/pathwayItinerary/add`; 
+            
+            if (data === undefined) {
+                window.alert('No Data, cannot Add/Remove Leg');
+                return;
+            } else {
+                $.post(url, data, function(data, status, xhr) {
+                window.alert(data.s_status + ': ' + status);
+                window.location.reload(true); 
+                });
+            }
+        }
+
+    input(type='hidden' id='numItin' value=ADAPathwaySearchResult[0].selectedItinNumber)
+    input(type='hidden' id='itinData' value='')
+
+    input(type='hidden' id='otpEndpoint' value=settingsRecord.otpEndpoint)
+    input(type='hidden' id='osmEndpoint' value=settingsRecord.osmEndpoint)
+    input(type='hidden' id='geocoderEndpoint' value=settingsRecord.geocoderEndpoint)
+    input(type='hidden' id='bingMapKey' value=settingsRecord.bingMapKey)
+    input(type='hidden', id='customlayerID' value=settingsRecord.userSettings)
+    input(type='hidden', id='settingsRecordBbox' value=settingsRecord.bbox)
+
+    input(type='hidden', id='cognitoRegion' value=settingsRecord.cognitoRegion)
+    input(type='hidden', id='s3AccessKeyId' value=settingsRecord.s3AccessKeyId)
+    input(type='hidden', id='s3SecretAccessKey' value=settingsRecord.s3SecretAccessKey)
+    input(type='hidden', id='s3BucketName' value=settingsRecord.s3BucketName)
+
+    input(type='hidden', id='fieldReviewRecords' value=fieldReviewSearchResult)
+    input(type='hidden', id='historicPicMetaDataLayersSeattle' value=historicPicMetaDataLayersSeattle)
+
+    input(type='hidden', id='transportThunderforestKey' value=settingsRecord.transportTileLayerKey)
+    input(type='hidden', id='customTileLayerName' value=settingsRecord.customTileLayerName)
+    input(type='hidden', id='mapboxAccountName' value=settingsRecord.mapboxAccountName)
+    input(type='hidden', id='mapboxAccountStyleID' value=settingsRecord.mapboxAccountStyleID)
+    input(type='hidden', id='mapboxAccountKey' value=settingsRecord.mapboxAccountKey)
+
+    input(type='hidden' id='ADAPathwayRecords', value=ADAPathwayRecords)
+    
+
+    .container.tripinfo
+        .form-row
+            .form-group.col-sm-1
+                label(for='id') PathwayID:
+                input#id.form-control.form-control-sm(type='text' placeholder='PathwayID' name='id'  readonly required='true' value=ADAPathwaySearchResult[0].id)  
+            .form-group.col-sm-1
+                label(for='clientId') ClientID: 
+                input#clientId.form-control.form-control-sm(type='text' placeholder='ClientId' name='clientId'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.clientId)               
+            .form-group.col-sm-2
+                label(for='clientName') Client Name: 
+                input#clientName.form-control.form-control-sm(type='text' placeholder='Client Name' name='clientName'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.clientName)     
+            .form-group.col-sm-2
+                label(for='active') Active: 
+                input#active.form-control.form-control-sm(type='text' placeholder='Active' name='active'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.active)   
+            .form-group.col-sm-2
+                label(for='conditions') Conditions: 
+                input#conditions.form-control.form-control-sm(type='text' placeholder='Conditions' name='conditions'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.conditions ? tripRequestSearchResult[0].ClientProfileModel.conditions.toString() : '-')               
+            .form-group.col-sm-2
+                label(for='mobAids') Mobility Aid: 
+                input#clientName.form-control.form-control-sm(type='text' placeholder='Mobility Aid' name='mobAids'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.mobAids ? tripRequestSearchResult[0].ClientProfileModel.mobAids.toString() : '-')     
+            .form-group.col-sm-2
+                label(for='prefSpaceType') Space Type: 
+                input#prefSpaceType.form-control.form-control-sm(type='text' placeholder='Space Type' name='prefSpaceType'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.prefSpaceType ? tripRequestSearchResult[0].ClientProfileModel.prefSpaceType.toString() : '-')    
+        
+        .form-row
+            .form-group.col-sm-1
+                label(for='tripRequestId') TripH.ID: 
+                input#tripRequestId.form-control.form-control-sm(type='text' placeholder='tripRequestId' name='tripRequestId'  readonly required='true' value=tripRequestSearchResult[0].id)               
+            .form-group.col-sm-1
+                label(for='bookingId') Bkg.ID: 
+                input#bookingId.form-control.form-control-sm(type='text' placeholder='bookingId' name='bookingId'  readonly required='true' value=tripRequestSearchResult[0].bookingId) 
+            
+            .form-group.col-sm-2
+                label(for='daysOfWeekRequested') Days-Week: 
+                input#daysOfWeekRequested.form-control.form-control-sm(type='text' placeholder='Days-Week' name='daysOfWeekRequested'  readonly required='true' value=tripRequestSearchResult[0].daysOfWeekRequested.toString())
+            .form-group.col-sm-2
+                label(for='tripTime') Trip/Appointment Time: 
+                input#tripTime.form-control.form-control-sm(type='text' placeholder='Time' name='tripTime'  readonly required='true' value=(tripRequestSearchResult[0].tripTime === null ? '--:--:--' : tripRequestSearchResult[0].tripTime) + ' / ' + 
+                    (tripRequestSearchResult[0].appointmentTime === null ? '--:--:--' : tripRequestSearchResult[0].appointmentTime) )    
+            .form-group.col-sm-2
+                label(for='dateAdded') Date Added: 
+                input#dateAdded.form-control.form-control-sm(type='text' placeholder='Date Added' name='dateAdded'  readonly required='true' value=tripRequestSearchResult[0].DateAdded)  
+            .form-group.col-sm-2
+                label(for='dateCompleted') Date Completed: 
+                input#dateCompleted.form-control.form-control-sm(type='text' placeholder='Date Completed' name='dateCompleted'  readonly required='true' value=tripRequestSearchResult[0].dateCompleted)  
+            .form-group.col-sm-2
+                label(for='status') Status: 
+                input#status.form-control.form-control-sm(type='text' placeholder='Enter Status' name='status'  readonly required='true' value=tripRequestSearchResult[0].status)  
+        .form-row
+            .form-group.col-sm-2
+                label(for='pName') Origin Name/Unit: 
+                input#pName.form-control.form-control-sm(type='text' placeholder='Origin Name/Unit' name='pName'  readonly required='true' value=tripRequestSearchResult[0].pName + ' , ' + tripRequestSearchResult[0].pUnit)     
+            .form-group.col-sm-4
+                label(for='address') Origin Address: 
+                input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=tripRequestSearchResult[0].pAddr + ', ' + tripRequestSearchResult[0].pCity  + ', ' +  tripRequestSearchResult[0].pZip )
+            .form-group.col-sm-2
+                label(for='dName') Destination Name/Unit: 
+                input#pName.form-control.form-control-sm(type='text' placeholder='Dest. Name/Unit' name='pName'  readonly required='true' value=tripRequestSearchResult[0].dName + ' , ' + tripRequestSearchResult[0].dUnit)     
+            .form-group.col-sm-4
+                label(for='address') Destination Address: 
+                input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=tripRequestSearchResult[0].dAddr + ', ' + tripRequestSearchResult[0].dCity  + ', ' +  tripRequestSearchResult[0].dZip ) 
+    
+    hr
+    .durationdiv
+            label.Tripduration(for='tripTotalTime') Trip Total Duration (min):
+            input.form-control.durationinput(type='text' id='tripTotalTime' value=ADAPathwaySearchResult[0].tripDurationTime placeholder='Enter Estimated Total Trip Duration')
+
+    #walkLegModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    h5#exampleModalLabel.modal-title Add New Walk Leg
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                    span(aria-hidden='true') &times;
+                .modal-body
+                    .input-group.mb-1
+                        .input-group-prepend
+                            span#basic-addon3.input-group-text Number of steps
+                        input#numOfSteps.form-control(type='number' name='leg no')
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-primary(type='button' onClick='addWalkLeg()') Add Walk Leg 
+    #busLegModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                    span(aria-hidden='true') &times;
+                .modal-body
+                    h5 Are you sure you want add a new bus leg?
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-primary(type='button' onClick='addBusLeg()') Add Bus Leg  
+    #removeLegModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true')
+        .modal-dialog(role='document')
+            .modal-content
+                .modal-header
+                    button.close(type='button' data-dismiss='modal' aria-label='Close')
+                    span(aria-hidden='true') &times;
+                .modal-body
+                    h5#other-leg Are you sure you want to remove this leg?
+                    h5(id="last-leg" hidden='true') Last leg cannot be removed
+                .modal-footer
+                    button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+                    button.btn.btn-primary(type='button' id="removeLegButton" onClick='removeLeg('+i+','+'"WALK"'+')') Remove Leg                        
+    form#instructionForm(method='POST' action='')
+      
+        .accordion.container-fluid.card
+            each leg, i in ADAPathwaySearchResult[0].itineraryInstructionLegs
+                if leg.mode === 'WALK'
+                    .card-header.container.card.css
+                        .row.mode
+                            .col-8
+                                .modeicon
+                                    img.modeiconpng(src='../images/walkicon.png')
+                                h4.feed Walk
+                                    iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" class="zooom" onClick='zoomSegment('+i+','+'"WALK"'+')')                             
+                            .col-4
+                                .formmenu
+                                    .dropdown
+                                        button#dropdownMenuButton.btn.btn-secondary.dropdown-toggle.newLegBtn(type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+                                            | Add New Leg
+                                        .dropdown-menu(aria-labelledby='dropdownMenuButton')
+                                            a.dropdown-item(type='button' data-toggle='modal' data-target='#walkLegModal' onClick='selectLeg('+i+','+'"WALK"'+')') Walk
+                                                a.dropdown-item(type='button' data-toggle='modal' data-target='#busLegModal' onClick='selectLeg('+i+','+'"BUS"'+')') Bus
+                                    button.btn.btn-sm.collap.newLegBtn(type='button' data-toggle='modal' data-target='#removeLegModal' onClick='removeLegBtn('+i+','+'"WALK"'+', '+ADAPathwaySearchResult[0].itineraryInstructionLegs.length+')' title='Delete')
+                                        i.fa.fa-trash
+                                    button.btn.btn-sm.collap.collapsed.newLegBtn( type='button' data-toggle="collapse" href="#collapseOne" id ="accordion")
+                                        i.fas.fa-arrow-down
+                                                              
+                        .form-row
+                            .form-group.col-sm-4
+                                label(for='leg[][from]') From
+                                input.form-control.form-control-sm(id='leg[][from]' name=i+'.from' type='text' value=leg.from placeholder='Enter from address')
+                            .form-group.col-sm-2
+                                label(for='leg.[mode]') Mode
+                                input.form-control.form-control-sm(id='leg[][mode]' name=i+'.mode' type='text' value=leg.mode)
+                            .form-group.col-sm-2
+                                label(for='leg.[walkDistance]') Dist.Total (ft.)
+                                input.form-control.form-control-sm(id='leg[][walkDistance]' name=i+'.walkDistance' type='text' value=leg.walkDistance)
+                            .form-group.col-sm-4
+                                label(for='leg[][to]') To
+                                input.form-control.form-control-sm(id='leg[][to]' name=i+'.to' type='text' value=leg.to placeholder='Enter to address')
+                    .card-body.collapse.container.fullwidth(id="collapseOne" data-parent="#accordion" style="background-color:#E9ECEF; width:99rem;")
+                            each step, s in leg.steps
+                                .form-row
+                                    .form-group.col-sm-1
+                                        label(for='leg[][steps][][relativeDirection]' style='font-size:12px;') Instruction
+                                        input.form-control.form-control-sm.instructionfont(id='leg[][steps][][relativeDirection]' name=i+'.steps.'+s+'.relativeDirection' type='text' value=step.relativeDirection placeholder='Enter Instruction')
+                                    .form-group.col-sm-1
+                                        label(for='leg[][steps][][absoluteDirection]' style='font-size:12px;') Direction
+                                        input.form-control.form-control-sm.instructionfont(id='leg[][steps][][absoluteDirection]' name=i+'.steps.'+s+'.absoluteDirection' type='text' value=step.absoluteDirection placeholder='North, South, East, West')
+                                    .form-group.col-sm-2
+                                        label(for='leg[][steps][][streetName]' style='font-size:12px;') Street-Name
+                                        input.form-control.form-control-sm.instructionfont(id='leg[][steps][][streetName]' name=i+'.steps.'+s+'.streetName' type='text' value=step.streetName placeholder='Enter street name')
+                                    .form-group.col-sm-1
+                                        label(for='leg[][steps][][distance]' style='font-size:12px;') Distance(ft.)
+                                        input.form-control.form-control-sm.instructionfont(id='leg[][steps][][distance]' name=i+'.steps.'+s+'.distance' type='text' value=step.distance)
+                                    .form-group.col-sm-1
+                                        label(for='leg[][steps][][slope]' style='font-size:12px;') Slope
+                                        input.form-control.form-control-sm.instructionfont(id='leg[][steps][][slope]' name=i+'.steps.'+s+'.slope' type='text' value=step.slope placeholder='X ~ Y %')
+                                    .form-group.col-sm-2
+                                        label(for='leg[][steps][][barriers]' style='font-size:12px;') Barriers
+                                        select.form-control.form-control-sm.instructionfont(class='selectpicker' id='leg[][steps][][barriers]' name=i+'.steps.'+s+'.barriers' value=step.barriers)
+                                                option(value=step.barriers) #{step.barriers}
+                                                option(value='') 
+                                                option(value='crossing') crossing
+                                                option(value='curb') curb
+                                                option(value='incline') incline
+                                                option(value='sidewalk') sidewalk
+                                                option(value='surface') surface
+                                                option(value='temp_barrier') temp_barrier
+                                                option(value='other_note') other_note
+
+                                    .form-group.col-sm-3
+                                        label(for='leg[][steps][][notes]' style='font-size:12px;') Notes
+                                        input.form-control.form-control-sm.instructionfont(id='leg[][steps][][notes]' name=i+'.steps.'+s+'.notes' type='text' value=step.notes)
+                                    .form-group.col-xs-1
+                                        button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button' style='font-size:16px;' title='zoom to map' onClick='zoomMapTo('+i+','+s+','+'"WALK"'+')')
+                                            iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" class="zooom")
+                                    .form-group.col-xs-1
+                                        button.nomargin.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button' style='font-size:16px;' title='Add field review' onClick='addFieldReview('+i+','+s+','+'"WALK"'+'); this.disabled=true;')
+                                            iconify-icon(data-icon="codicon:add" class="zooom")
+                    hr(color='#407DE0' size='10')
+                else if (leg.mode === 'BUS' || leg.mode === 'TRAM')
+                    .card-header.container.card.css
+                        .row.mode
+                            .col-8
+                                .modeicon
+                                    img.modeiconpng(src='../images/bustramicon.png')
+                                h4.feed Bus/Tram
+                                    iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" class="zooom" onClick='zoomSegment('+i+','+'"BUS"'+')')
+                            .col-4
+                                .formmenu
+                                    .dropdown
+                                        button#dropdownMenuButton.btn.btn-secondary.dropdown-toggle.newLegBtn(type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+                                            | Add New Leg
+                                        .dropdown-menu(aria-labelledby='dropdownMenuButton')
+                                            a.dropdown-item(type='button' data-toggle='modal' data-target='#walkLegModal' onClick='selectLeg('+i+','+'"WALK"'+')') Walk
+                                            a.dropdown-item(type='button' data-toggle='modal' data-target='#busLegModal' onClick='selectLeg('+i+','+'"BUS"'+')') Bus
+                                    button.btn.btn-sm.collap.newLegBtn(type='button' data-toggle='modal' data-target='#removeLegModal' onClick='removeLegBtn('+i+','+'"BUS"'+', '+ADAPathwaySearchResult[0].itineraryInstructionLegs.length+')' title='Delete')
+                                        i.fa.fa-trash
+                                    button.btn.btn-sm.collap.collapsed.newLegBtn( type='button' data-toggle="collapse" href="#collapsetwo" id ="accordion")
+                                        i.fas.fa-arrow-down
+                            
+                        .form-row
+                            .form-group.col-sm-5
+                                label(for='leg[][from]') Depart
+                                input.form-control.form-control-sm(id='leg[][from]' name=i+'.from' type='text' value=leg.from placeholder='Enter depart address')
+                            .form-group.col-sm-2
+                                label(for='leg[][mode]') Mode
+                                input.form-control.form-control-sm(id='leg[][mode]' name=i+'.mode' type='text' value=leg.mode)
+                            .form-group.col-sm-5
+                                label(for='leg[][to]') Arrive
+                                input.form-control.form-control-sm(id='leg[][to]' name=i+'.to' type='text' value=leg.to placeholder='Enter arrive address')
+                    .card-body.collapse.container.fullwidth.collapse(id="collapsetwo" data-parent="#accordion" style="background-color:#E9ECEF; width:99rem;")
+                            .form-row
+                                .form-group.col-sm-5
+                                    .form-row
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopFrom][name]' style='font-size:12px;') Depart-Stop-ID
+                                            input.form-control.form-control-sm.instructionfont(id='leg[][busStopFrom][name]' name=i+'.busStopFrom.name' type='text' value=leg.busStopFrom.name placeholder='Enter depart ID')
+                                        .form-group.col-sm-2
+                                            label(for='leg[][busStopFrom][stopTimeWeekday]' style='font-size:12px;') Weekdays
+                                            input.form-control.form-control-sm.instructionfont(id='leg[][busStopFrom][stopTimeWeekdays]' class=i+'bus-stop-from-weekdays' name=i+'.busStopFrom.stopTimeWeekdays' type='text' value=leg.busStopFrom.stopTimeWeekdays placeholder="Stop time" onclick='openModal("'+i+'bus-stop-from-weekdays", "'+leg.busStopFrom.name+'", "'+leg.busStopTo.name+'", "'+leg.from+'", "'+leg.to+'", "'+leg.busNumber+'", "'+i+'")')
+                                        .form-group.col-sm-2
+                                            label(for='leg[][busStopFrom][stopTimeSaturday]' style='font-size:12px;') Saturday
+                                            input.form-control.form-control-sm.instructionfont(type='text' id='leg[][busStopFrom][stopTimeSaturday]' class=i+'bus-stop-from-saturday' name=i+'.busStopFrom.stopTimeSaturday' value=leg.busStopFrom.stopTimeSaturday placeholder="Stop time" onclick='openModal("'+i+'bus-stop-from-saturday", "'+leg.busStopFrom.name+'", "'+leg.busStopTo.name+'", "'+leg.from+'", "'+leg.to+'", "'+leg.busNumber+'", "'+i+'")')
+                                        .form-group.col-sm-2
+                                            label(for='stopTimeSunday' style='font-size:12px;') Sunday 
+                                            input.form-control.form-control-sm.instructionfont(id='leg[][busStopFrom][stopTimeSunday]' class=i+'bus-stop-from-sunday' name=i+'.busStopFrom.stopTimeSunday' type='text' value=leg.busStopFrom.stopTimeSunday placeholder="Stop time" onclick='openModal("'+i+'bus-stop-from-sunday", "'+leg.busStopFrom.name+'", "'+leg.busStopTo.name+'", "'+leg.from+'", "'+leg.to+'", "'+leg.busNumber+'", "'+i+'")')
+                                        .form-group.col-sm-1
+                                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button' style='font-size:16px;' title='zoom to map' onClick='zoomMapTo('+i+','+'""'+','+'"busStopFrom"'+')')
+                                                iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" class="zooom")
+                                        .form-group.col-xs-1
+                                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button' style='font-size:16px;' title='Add field review' onClick='addFieldReview('+i+','+s+','+'"busStopFrom"'+') ; this.disabled=true;')
+                                                iconify-icon(data-icon="codicon:add" class="zooom")
+                                    .form-row
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopFrom][shelter]' style='font-size:13px;') Shelter
+                                            select.form-control.form-control-sm.instructionfont(type='select' class='selectpicker' id='leg[][busStopFrom][shelter]' name=i+'.busStopFrom.shelter' value=leg.busStopFrom.shelter)
+                                                option(value=leg.busStopFrom.shelter) #{leg.busStopFrom.shelter} 
+                                                option(value='Yes') Yes
+                                                option(value='No') No
+                                                option(value='Unknown') Unknown
+
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopFrom][bench]' style='font-size:13px;') Bench
+                                            select.form-control.form-control-sm.instructionfont(type='select' class='selectpicker' id='leg[][busStopFrom][bench]' name=i+'.busStopFrom.bench' value=leg.busStopFrom.bench)
+                                                option(value=leg.busStopFrom.bench) #{leg.busStopFrom.bench} 
+                                                option(value='Yes') Yes
+                                                option(value='No') No
+                                                option(value='Unknown') Unknown
+
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopFrom][light]' style='font-size:13px;') Light
+                                            select.form-control.form-control-sm.instructionfont(type='select' class='selectpicker' id='leg[][busStopFrom][light]' name=i+'.busStopFrom.light' value=leg.busStopFrom.light)
+                                                option(value=leg.busStopFrom.light) #{leg.busStopFrom.light} 
+                                                option(value='Yes') Yes
+                                                option(value='No') No
+                                                option(value='Unknown') Unknown
+                                                
+
+                                    .form-row
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopFrom][barriers]' style='font-size:13px;') Barriers
+                                            select.form-control.form-control-sm.instructionfont(class='selectpicker' id='leg[][busStopFrom][barriers]' name=i+'.busStopFrom.barriers' value=leg.busStopFrom.barriers)
+                                                option(value=leg.busStopFrom.barriers) #{leg.busStopFrom.barriers}
+                                                option(value='') 
+                                                option(value='curb_no_barriers') curb_no_barriers
+                                                option(value='curb_limited') curb_limited
+                                                option(value='no_lift') no_lift
+                                                option(value='street') street
+                                                option(value='street_limited') street_limited
+                                                option(value='temp_closure') temp_closure
+                                                option(value='other_note') other_note
+
+                                        .form-group.col-sm-6
+                                            label(for='leg[][busStopFrom][notes]' style='font-size:13px;') Notes
+                                            input.form-control.form-control-sm.instructionfont(id='leg[][busStopFrom][notes]' name=i+'.busStopFrom.notes' type='text' value=leg.busStopFrom.notes)
+                                    
+                                .form-group.col-sm-2
+                                    .form-group.col-sm-10
+                                        label(for='leg[][busNumber]' style='font-size:13px;') Route name
+                                        input.form-control.form-control-sm.instructionfont(id='leg[][busNumber]' name=i+'.busNumber' type='text' value=leg.busNumber)
+                                
+                                .form-group.col-sm-5
+                                    .form-row
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopTo][name]' style='font-size:12px;') Arrive-Stop-ID
+                                            input.form-control.form-control-sm.instructionfont(id='leg[][busStopTo][name]' name=i+'.busStopTo.name' type='text' value=leg.busStopTo.name placeholder='Enter arrive stop ID')
+                                        .form-group.col-sm-2
+                                            label(for='leg[][busStopTo][stopTimeWeekdays]' style='font-size:12px;') Weekdays
+                                            input.form-control.form-control-sm.instructionfont(id='leg[][busStopTo][stopTimeWeekdays]' name=i+'.busStopTo.stopTimeWeekdays' type='text' value=leg.busStopTo.stopTimeWeekdays placeholder="Stop time" )
+                                        .form-group.col-sm-2
+                                            label(for='leg[][busStopTo][stopTimeSaturday]' style='font-size:12px;') Saturday
+                                            input.form-control.form-control-sm.instructionfont(type='text' id='leg[][busStopTo][stopTimeSaturday]' name=i+'.busStopTo.stopTimeSaturday' value=leg.busStopTo.stopTimeSaturday placeholder="Stop time")
+                                        .form-group.col-sm-2
+                                            label(for='leg[][busStopTo][stopTimeSunday]' style='font-size:12px;') Sunday 
+                                            input.form-control.form-control-sm.instructionfont(id='leg[][busStopTo][stopTimeSunday]' name=i+'.busStopTo.stopTimeSunday' type='text' value=leg.busStopTo.stopTimeSunday placeholder="Stop time")
+                                        .form-group.col-sm-1
+                                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button' style='font-size:16px;' title='zoom to map' onClick='zoomMapTo('+i+','+'""'+','+'"busStopTo"'+')')
+                                                iconify-icon(data-icon="emojione:magnifying-glass-tilted-right" class="zooom")
+                                        .form-group.col-xs-1
+                                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button'  style='font-size:16px;' title='Add field review' onClick='addFieldReview('+i+','+s+','+'"busStopTo"'+') ; this.disabled=true;')
+                                                iconify-icon(data-icon="codicon:add" class="zooom")
+                                    .form-row
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopTo][shelter]' style='font-size:13px;') Shelter
+                                            select.form-control.form-control-sm.instructionfont(type='select' class='selectpicker' id='leg[][busStopTo][shelter]' name=i+'.busStopTo.shelter' value=leg.busStopTo.shelter)
+                                                option(value=leg.busStopTo.shelter) #{leg.busStopTo.shelter}
+                                                option(value='Yes') Yes
+                                                option(value='No') No
+                                                option(value='Unknown') Unknown
+ 
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopTo][bench]' style='font-size:13px;') Bench
+                                            select.form-control.form-control-sm.instructionfont(type='select' class='selectpicker' id='leg[][busStopTo][bench]' name=i+'.busStopTo.bench' value=leg.busStopTo.bench)
+                                                option(value=leg.busStopTo.bench) #{leg.busStopTo.bench}
+                                                option(value='Yes') Yes
+                                                option(value='No') No
+                                                option(value='Unknown') Unknown
+
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopTo][light]' style='font-size:13px;') Light
+                                            select.form-control.form-control-sm.instructionfont(type='select' class='selectpicker' id='leg[][busStopTo][light]' name=i+'.busStopTo.light' value=leg.busStopTo.light)
+                                                option(value=leg.busStopTo.light) #{leg.busStopTo.light}
+                                                option(value='Yes') Yes
+                                                option(value='No') No
+                                                option(value='Unknown') Unknown    
+                                    .form-row
+                                        .form-group.col-sm-3
+                                            label(for='leg[][busStopTo][barriers]' style='font-size:13px;') Barriers
+                                            select.form-control.form-control-sm.instructionfont(class='selectpicker' id='leg[][busStopTo][barriers]' name=i+'.busStopTo.barriers' value=leg.busStopTo.barriers)
+                                                option(value=leg.busStopTo.barriers) #{leg.busStopTo.barriers}
+                                                option(value='') 
+                                                option(value='curb_no_barriers') curb_no_barriers
+                                                option(value='curb_limited') curb_limited
+                                                option(value='no_lift') no_lift
+                                                option(value='street') street
+                                                option(value='street_limited') street_limited
+                                                option(value='temp_closure') temp_closure
+                                                option(value='other_note') other_note
+
+                                        .form-group.col-sm-6
+                                            label(for='leg[][busStopTo][notes]' style='font-size:13px;') Notes
+                                            input.form-control.form-control-sm.instructionfont(id='leg[][busStopTo][notes]' name=i+'.busStopTo.notes' type='text' value=leg.busStopTo.notes)
+                    hr(color='#407DE0' size='10')
+        p
+        .form-row
+            .form-group.col-xs-2
+                button.primarybutton(type='button' onclick='drawRoute(JSONrouteData)') Load-Map 
+            .form-group.col-sm-2
+                button.secondarybutton(type='button' onclick='clearMap()') Clear
+            .form-group.col-sm-2
+            .form-group.col-xs-2
+                button.primarybutton(type='button' onclick='saveTransitInstruction(updatedADAPathwayRecord(), location.href)') Update
+            .form-group.col-xs-2
+                button.secondarybutton(type='button' onclick='history.back()') Cancel
+            .form-group.col-sm-2
+            .form-group.col-xs-2
+                button.primarybutton(type='button' onclick='window.open(tripRequestHistoryURL(), "_self");') Edit-Trip-History
+    
+    .modal.fade(id='staticBackdrop' role='dialog' aria-labelledby='staticBackdropLabel' aria-hidden='true' style='display:none;background-color:transparent;')
+        .modal-dialog.modal-lg
+            .modal-content
+                .modal-header
+                    .modal-title#staticBackdropLabel Stop Time Picker
+                     button(type='button' class='close' data-dismiss='modal' aria-label='Close')
+                            span(aria-hidden='true') &times;
+                .modal-body
+                    h6 Pick a Date
+                    .container
+                        .row
+                            .col-lg-4
+                                input(type='date' id='datepicker' onChange='getDate(event)')
+                            .col-lg-8
+                                div.row
+                                    div(class="btn-group dropright row" id="zero-list-div" hidden='true')
+                                        button(type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") 12 AM - 8 AM
+                                            <div style='font-size:14px'>(Early Morning)</div>
+                                            div(class="dropdown-menu zero" id="zero-list" style='max-height:400px;overflow-y:auto;margin:1px')
+                                    
+                                    div(class="btn-group dropright" id="one-list-div" hidden='true' style='margin-left:20px')
+                                        button(type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") 8 AM - 4 PM
+                                            <div style='font-size:14px'>(Morning - Evening)</div>
+                                            div(class="dropdown-menu one" id="one-list" style='max-height:400px;overflow-y:auto;margin:1px')
+                                        
+                                    div(class="btn-group dropright" id="two-list-div" hidden='true' style='margin-left:10px')
+                                        button(type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false") 4 PM - 12 AM
+                                            <div style='font-size:14px'>(Evening - Night)</div>
+                                            div(class="dropdown-menu two" id="two-list" style='max-height:400px;overflow-y:auto;margin:1px')
+
+                                    input(type='hidden' id='inputId')
+                                    input(type='hidden' id='fromStopId')
+                                    input(type='hidden' id='toStopId')
+                                    input(type='hidden' id='fromStop')
+                                    input(type='hidden' id='toStop')
+                                    input(type='hidden' id='busNumber')
+                                    input(type='hidden' id ='departTime')
+                
+                .modal-footer
+                    .row
+                        .col.lg-6 
+                            label(for="selectedTime") Selected Time: &nbsp;
+                            input(type='text' name='selectedTime' id ='selectedTime' hidden='false' style='font-weight: bold;')
+                    
+                    button.secondarybutton(type='button' data-dismiss='modal') Cancel
+                    button.primarybutton(type='button' data-dismiss='modal' onClick='saveTime()') Select
+
+    #map
+    script(src='/javascripts/leafletOTP.js')
+    
+

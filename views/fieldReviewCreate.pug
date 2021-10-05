@@ -1,0 +1,244 @@
+doctype html
+html
+  head
+    link(rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.css")
+    link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous")
+    link(rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous")
+    link(rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.css")
+    link(rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="")
+    link(rel="stylesheet" href='/stylesheets/commons.css')
+    link(rel='stylesheet' href='/stylesheets/style.css')
+  
+    script(src='https://code.iconify.design/1/1.0.7/iconify.min.js')
+    script(src='https://kit.fontawesome.com/b99e675b6e.js')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous")
+    script(src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js")
+    script(src="https://unpkg.com/tableexport.jquery.plugin/libs/jsPDF/jspdf.min.js")
+    script(src="https://unpkg.com/tableexport.jquery.plugin/libs/jsPDF-AutoTable/jspdf.plugin.autotable.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous")
+    script(src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+    integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+    crossorigin="")
+    script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous")
+    script(src="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.js")
+    script(src="https://unpkg.com/bootstrap-table@1.17.1/dist/extensions/export/bootstrap-table-export.min.js")
+    script(src='https://kit.fontawesome.com/b99e675b6e.js')
+    link(rel="stylesheet" href="https://unpkg.com/ionicons@4.5.5/dist/css/ionicons.min.css")
+    link(rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous")
+    script(src='https://code.jquery.com/jquery-3.4.1.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js')
+
+    //- Form serializer, encoder, Write Map Notes and save methods
+    script(src='/javascripts/serializeTransitInstruction.js')
+    
+    script.
+        const routeData = JSON.stringify(!{ADAPathwaySearchResult.pathwayItinerary});
+        const JSONrouteData = JSON.parse(routeData);
+        const selectedItinNumber = !{ADAPathwaySearchResult.selectedItinNumber};
+        const itin = JSONrouteData.plan.itineraries[selectedItinNumber];
+        const legIndex = !{leg};
+        const stepIndex = !{step};
+        const legMode = '!{mode.toString()}';
+        function tagLocation() {
+            let location = 'null';
+            let busModes;
+
+            if ((legIndex === 0) && (legMode === 'WALK')) {
+                location = 'Origin' + ': ' + itin.legs[legIndex].steps[stepIndex].streetName;
+            } else if ((legIndex === 0) && (legMode !== 'WALK')) {
+                if (legMode === 'busStopFrom') { busModes = 'from'; }
+                else if (legMode === 'busStopTo') { busModes = 'to'; }
+                location = 'Origin' + ': ' + itin.legs[legIndex][busModes].stopId;
+
+            } else if ((legIndex === (itin.legs.length - 1)) && (legMode === 'WALK')) {
+            location = 'Destination' + ': ' + itin.legs[legIndex].steps[stepIndex].streetName; 
+            } else if ((legIndex === (itin.legs.length - 1)) && (legMode !== 'WALK')) {
+                if (legMode === 'busStopFrom') { busModes = 'from'; }
+                else if (legMode === 'busStopTo') { busModes = 'to'; }
+                location = 'Destination' + ': ' + itin.legs[legIndex][busModes].stopId;
+
+            } else if ((legIndex !== 0) && (legMode === 'WALK')) {
+                location = 'Transfer' + ': ' + itin.legs[legIndex].steps[stepIndex].streetName;
+            } else if ((legIndex !== 0) && (legMode !== 'WALK')) {
+                if (legMode === 'busStopFrom') { busModes = 'from'; }
+                else if (legMode === 'busStopTo') { busModes = 'to'; }
+                location = 'Transfer' + ': ' + itin.legs[legIndex][busModes].stopId;
+            } 
+            
+            document.getElementById('reviewLocation').value = location;
+        }
+        window.onload = function composeMapNote() {
+            const tripRequestId = !{tripRequestData[0].id};
+            let bookingId = '';
+            if (!{JSON.stringify(tripRequestData[0].bookingId)}) {
+                bookingId = !{JSON.stringify(tripRequestData[0].bookingId)};
+            } else { bookingId = ''; }
+            const conditions = !{JSON.stringify(tripRequestData[0].ClientProfileModel.conditions)};
+            const mobAids = !{JSON.stringify(tripRequestData[0].ClientProfileModel.mobAids)};
+            const prefSpaceType = !{JSON.stringify(tripRequestData[0].ClientProfileModel.prefSpaceType)};
+            let composedMapNote;
+            tagLocation();
+            let busModes;
+            if (legMode === 'WALK') {
+                composedMapNote = 'Field-Review Task, TripReq.ID#:' + 
+                    tripRequestId + '; Bkg.ID#:' + bookingId + '; Cond:' + conditions.toString() + ' ; ' + 'MobAids:' + mobAids.toString() + 
+                    ' ; ' + 'SpaceType:' + prefSpaceType.toString() + '\n' + 
+                    ' from: ' + itin.legs[legIndex].from.name + ', ' + legMode + ', to: ' +
+                    itin.legs[legIndex].to.name + '\n' +
+                    'Survey-> ' + itin.legs[legIndex].steps[stepIndex].absoluteDirection + 
+                    ' of ' + itin.legs[legIndex].steps[stepIndex].streetName + ' for ' + 
+                    Math.round(3.28084 * parseFloat(itin.legs[legIndex].steps[stepIndex].distance)) + 'feet' + ' ;' + '\n' +
+                    'Wheelchair? Curb? Crossing? Barriers?';
+            } else {
+                if (legMode === 'busStopFrom') { busModes = 'from'; }
+                else if (legMode === 'busStopTo') { busModes = 'to'; }
+
+                composedMapNote = 'Field-Review, TripReq.ID#:' + 
+                    tripRequestId + '; Cond:' + conditions.toString() + ' ; ' + 'MobAids:' + mobAids.toString() + 
+                    ' ; ' + 'SpaceType:' + prefSpaceType.toString() + '\n' +
+                    ' from: ' + itin.legs[legIndex].from.name + ', ' + itin.legs[legIndex].mode + '#' + itin.legs[legIndex].route + ', to: ' +
+                    tripRequestId + itin.legs[legIndex].to.name + '\n' +
+                    'Survey-> ' + ' BusStopID:' + itin.legs[legIndex][busModes].stopId + ' ;' + '\n' +
+                    'Shelter? Bench? Light? Barriers?';
+            }
+            document.getElementById('mapNote').value = composedMapNote;
+        }
+        function createFieldReviewRecord() {
+            let error = false;
+            const latitude = !{lat};
+            const longitude = !{lon};
+            const URLOSMBase = !{JSON.stringify(settingsRecord.osmEndpoint)};
+            let formJSON = {};
+
+            const x = $('form').serializeArray();
+            $.each(x, (i, field) => {
+                formJSON[field.name] = field.value;
+                if ((field.name !== 'notes') && (field.value === '')) {
+                    if (field.name === 'mapNoteId') {
+                            window.alert('Map-Note must be added before Field Review can be created');
+                            error = true;
+                    }
+                    else {
+                        window.alert('Fill the Required Field: ' + field.name);
+                        error = true;
+                    }
+                }  
+            });
+            formJSON['URLMapNote'] = URLOSMBase + '/note/' + formJSON.mapNoteId + '#map=19/' + latitude + '/' + longitude + '&layers=ND';
+            
+            if (!error) { 
+                saveFieldReview(formJSON, location.href);
+            }
+            else { return; }   
+        }
+
+    input(type='hidden' id='latitude' value=lat)
+    input(type='hidden' id='longitude' value=lon)
+    input(type='hidden' id='mapNote' value='')
+    input(type='hidden' id='osmEndpoint' value=settingsRecord.osmEndpoint)
+    input(type='hidden' id='osmUsername' value=settingsRecord.osmUsername)
+    input(type='hidden' id='osmUserCipher' value=settingsRecord.osmUserCipher)
+    input(type='hidden' id='createdAt' value=settingsRecord.createdAt)
+    input(type='hidden' id='cipherKey1' value=cipherKey1)
+    //- Info Deck TripRequest and ClientProfile
+    if tripRequestData && !(search_result_count === 0)
+        .formcontainer(id='dialog').container-fluid.card
+            h3 #{title} 
+            .container-fluid.card 
+                .form-row
+                    .form-group.col-sm-2
+                        label(for='clientId') ClientID: 
+                        input#clientId.form-control.form-control-sm(type='text' placeholder='ClientId' name='clientId'  readonly required='true' value=tripRequestData[0].ClientProfileModel.clientId)               
+                    .form-group.col-sm-2
+                        label(for='clientName') Client Name: 
+                        input#clientName.form-control.form-control-sm(type='text' placeholder='Client Name' name='clientName'  readonly required='true' value=tripRequestData[0].ClientProfileModel.clientName) 
+                    .form-group.col-sm-2
+                        label(for='conditions') Conditions: 
+                        input#conditions.form-control.form-control-sm(type='text' placeholder='Conditions' name='conditions'  readonly required='true' value=tripRequestData[0].ClientProfileModel.conditions ? tripRequestData[0].ClientProfileModel.conditions.toString() : '-')               
+                    .form-group.col-sm-2
+                        label(for='mobAids') Mobility Aid: 
+                        input#clientName.form-control.form-control-sm(type='text' placeholder='Mobility Aid' name='mobAids'  readonly required='true' value=tripRequestData[0].ClientProfileModel.mobAids ? tripRequestData[0].ClientProfileModel.mobAids.toString() : '-')     
+                    .form-group.col-sm-2
+                        label(for='prefSpaceType') Space Type: 
+                        input#prefSpaceType.form-control.form-control-sm(type='text' placeholder='Space Type' name='prefSpaceType'  readonly required='true' value=tripRequestData[0].ClientProfileModel.prefSpaceType ? tripRequestData[0].ClientProfileModel.prefSpaceType.toString() : '-')  
+                    .form-group.col-md-2
+                        label(for='priority') Priority: 
+                        input#priority.form-control.form-control-sm(type='text' placeholder='Priority' name='priority'  readonly required='true' value=tripRequestData[0].priority) 
+                .form-row
+                    .form-group.col-sm-1
+                        label(for='tripRequestId') TripH.ID: 
+                        input#tripRequestId.form-control.form-control-sm(type='text' placeholder='tripRequestId' name='tripRequestId'  readonly required='true' value=tripRequestData[0].id)               
+                    .form-group.col-sm-1
+                        label(for='bookingId') Bkg.ID: 
+                        input#bookingId.form-control.form-control-sm(type='text' placeholder='Bkg. Id' name='bookingId'  readonly required='true' value=tripRequestData[0].bookingId)  
+                    .form-group.col-sm-2
+                        label(for='dateAdded') Date Added: 
+                        input#dateAdded.form-control.form-control-sm(type='text' placeholder='Date Added' name='dateAdded'  readonly required='true' value=tripRequestData[0].DateAdded) 
+                    .form-group.col-sm-3
+                        label(for='pName') Origin Name/Unit: 
+                        input#pName.form-control.form-control-sm(type='text' placeholder='Origin Name/Unit' name='pName'  readonly required='true' value=tripRequestData[0].pName + ' , ' + tripRequestData[0].pUnit)     
+                    .form-group.col-sm-5
+                        label(for='address') Origin Address: 
+                        input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=tripRequestData[0].pAddr + ', ' + tripRequestData[0].pCity  + ', ' +  tripRequestData[0].pZip )  
+                .form-row
+                    .form-group.col-sm-2
+                        label(for='daysOfWeekRequested') Days Week: 
+                        input#daysOfWeekRequested.form-control.form-control-sm(type='text' placeholder='Days-Week' name='daysOfWeekRequested'  readonly required='true' value=tripRequestData[0].daysOfWeekRequested.toString())
+                    .form-group.col-sm-2
+                        label(for='tripTime') Trip/Appointment Time: 
+                        input#tripTime.form-control.form-control-sm(type='text' placeholder='Time' name='tripTime'  readonly required='true' value=(tripRequestData[0].tripTime === null ? '--:--:--' : tripRequestData[0].tripTime.toString()) + ' / ' + 
+                            (tripRequestData[0].appointmentTime === null ? '--:--:--' : tripRequestData[0].appointmentTime.toString()))     
+                    .form-group.col-sm-3
+                        label(for='dName') Destination Name/Unit: 
+                        input#pName.form-control.form-control-sm(type='text' placeholder='Dest. Name/Unit' name='pName'  readonly required='true' value=tripRequestData[0].dName + ' , ' + tripRequestData[0].dUnit)     
+                    .form-group.col-sm-5
+                        label(for='address') Destination Address: 
+                        input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=tripRequestData[0].dAddr + ', ' + tripRequestData[0].dCity  + ', ' +  tripRequestData[0].dZip ) 
+
+            //- Create Field Review Form
+            .container-fluid.card
+                form(method='POST' id='fieldReviewForm' action='')
+                    .form-row
+                        .form-group.col-md-2
+                            label(for='tripRequestsId')
+                            input#tripRequestsId.form-control(type='text' placeholder='Trip Requests ID' name='tripRequestsId' readonly required='true' style='display:none' value=tripRequestsId)
+                    .form-row
+                        .form-group.col-md-3
+                            label(for='reviewLocation') Review Location: 
+                            input#reviewLocation.form-control.form-control-sm(type='text' placeholder='Review Location' name='reviewLocation' readonly required='true' value='')
+                        .form-group.col-md-3
+                            label(for='officersId') Assign Officer: 
+                            select#officersId.form-control.form-control-sm(type='select' required='true' name = "officersId" value='')
+                                option(value=null, label="-- Select --") 
+                                if officers
+                                    each item , i in Object.entries(officers)
+                                        option(value=item[1].id  data-container='body',  label=item[1].id+ ": " + item[1].lastName + ", " + item[1].firstName  + ' | Zones : ' + item[1].zoneZips )
+                        .form-group.col-md-2
+                            label(for='priority') Priority: 
+                            select#priority.form-control.form-control-sm(type='select' name = "priority" value='')
+                                option(value='Medium' selected='Medium', label="Medium")
+                                option(value='High', label="High")
+                                option(value='Medium', label= "Medium")
+                                option(value='Low', label= "Low")
+                        .form-group.col-md-2     
+                            label(for='status') Status:
+                            select#status.form-control.form-control-sm(type='select' required='true' name = "status" value='')
+                                option(value='Not_started' selected='Not_started', label="Not started")
+                                option(value='Not_started', label="Not started")
+                                option(value='Hold', label="Hold")  
+                                option(value='In_progress', label="In progress")
+                                option(value='Completed', label= "Completed")
+                        .form-group.col-md-2
+                            label(for='mapNoteId') Map-Note-ID
+                            input#mapNoteId.form-control.form-control-sm(type='text' placeholder='Map Note ID' name='mapNoteId' readonly required='true' value='')
+                    .form-row
+                        .form-group.col-md-12
+                            label(for='notes') Notes: 
+                            input#notes.form-control.form-control-sm(type='text' placeholder='enter notes' name='notes' value='')
+                            p
+                    .formfooter
+                            button.primarybutton.btn(type='button' id='primaryButton' onclick='findReadWriteReopenMapNote(' + lat + ', ' + lon + '); this.disabled=true; ') Add-Map-Note
+                            button.primarybutton.btn(type='button' id='createBtn' onclick='createFieldReviewRecord()') Add-Field-Review
+                            button.secondarybutton(type='button' onclick='window.close()') Cancel
+                            

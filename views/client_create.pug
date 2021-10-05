@@ -1,0 +1,108 @@
+extends layout
+
+block content
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/clients/list') Clients List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Create Client
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+        
+
+    .formcontainer
+        form#Form(method='POST' action='')
+            .form-row
+                .form-group.required.col-md-6
+                    label.control-label(for='clientName') Full Name: 
+                    input#clientName.form-control.form-control-md(pattern= "^[a-zA-Z_ ]*$" placeholder='enter full name' name='clientName' required='true' value='')
+                .form-group.required.col-md-6
+                    label.control-label(for='clientId') Client ID: 
+                    input#clientId.form-control.form-control-md(type='number' placeholder='enter client id number' name='clientId' required='true' value='' min=0 oninput="validity.valid||(value='');")              
+                .form-group.required.col-md-6
+                    label.control-label(for='conditions') Eligibility Condition Codes: 
+                    select#conditions.form-control.custom-select(type='select' name="conditions" multiple value='')
+                        if lookupCodes
+                            each value, i in lookupCodes
+                                if value.conditions
+                                    option(value=value.conditions, label=value.conditions)
+                .form-group.required.col-md-6
+                    label.control-label(for='mobAids') Mobility Aid Codes: 
+                    select#mobAids.form-control.custom-select(type='select' name="mobAids" multiple value='')
+                        if lookupCodes
+                            each value, i in lookupCodes
+                                if value.mobAids
+                                    option(value=value.mobAids, label=value.mobAids)
+                .form-group.required.col-md-6
+                    label.control-label(for='prefSpaceType') Space Type: 
+                    select#prefSpaceType.form-control.custom-select(type='select' name="prefSpaceType" multiple value='')
+                        if lookupCodes
+                            each value, i in lookupCodes
+                                if value.prefSpaceType
+                                    option(value=value.prefSpaceType, label=value.prefSpaceType)
+
+                .form-group.required.col-md-6
+                    label.control-label(for='btt') BTT: 
+                    select#btt.form-control.custom-select(type='select' name = "btt" value='')
+                        option(value=null, label="-- Select --") 
+                        option(value='Approved' label="Approved")
+                        option(value='Did Not Complete', label= "Did Not Complete")
+                        option(value='Not Recommended', label= "Not Recommended")
+                        option(value='Referred', label= "Referred")
+                        option(value='Refused', label= "Refused")
+                        option(value='Trained', label= "Trained")
+                        option(value='Unable to Contact', label= "Unable to Contact")
+                .form-group.required.col-md-6
+                    label.control-label(for='clientStatus') Client Active: 
+                    select#clientStatus.form-control.custom-select(type='select' required='true' name = "clientStatus" value='')
+                        option(value=null, label="-- Select --") 
+                        option(value='true' label="True" )
+                        option(value='false', label= "False")
+                .form-group.col-md-12
+                    label.control-label(for='notes') Notes: 
+                    input#notes.form-control(type='text' placeholder='enter notes' name='notes' value='')
+                    p
+                .formfooter
+                    input.primarybutton.submit(type='submit' value='Create')
+                    input.secondarybutton.submit(type='button' value='Cancel' onclick="location.href='/clients/list';")
+
+    if s_status == 'Record saved'
+        .alert.alert-success.alert-dismissable.fade.show(role='alert')
+            .popupalerts
+                .notificationicon
+                    iconify-icon(data-icon='teenyicons:tick-circle-outline')
+                h2.alert-heading Success! 
+                p                    
+                .alert-body
+                    | Client Profile Added! 
+                p                 
+                .alert-footer
+                    button.neu.popupbtn(type='button' onclick="location.href='/clients/create';") Add new client
+                    button.neu.popupbtn(type='button' onclick="location.href='/clients/list';") Go to clients list
+
+    
+    if s_status == 'Record already exists'
+        .alert.alert-danger.alert-dismissable.fade.show(role='alert')
+            .popupalerts
+                button.close(type='button' data-dismiss='alert')
+                    span(aria-hidden='true') &times;
+                .warningicon
+                    iconify-icon(data-icon='carbon:warning-square')
+                h2.alert-heading Client already exists!
+                p
+                .alert-body
+                    | Create another record!
+                p
+                .alert-footer
+                    button.neu.popupbtn(type='button' onclick="location.href='/clients/list';") Go to Clients List
+                         
+
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg
+
+

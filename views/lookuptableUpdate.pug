@@ -1,0 +1,76 @@
+extends layout
+
+block content
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/settings') Settings
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li
+                a(href='/lookuptables/list') Lookup List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Update 
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+
+    if lookuptable_search_result && !(search_result_count === 0)
+
+        .formcontainer 
+            form(method='POST' action='')
+                    .form-row
+                        .form-group.col-md-4
+                            label(for='id') ID: 
+                            input#id.form-control(type='integer' name='id'  readonly required='true' value=lookuptable_search_result[0].dataValues.id)
+                    .form-row    
+                        .form-group.col-md-4.margin
+                            label(for='conditions') Eligibility Condition Code: 
+                            input#conditions.form-control(type='text'  name='conditions' required='true' value=lookuptable_search_result[0].dataValues.conditions)   
+                        .form-group.col-md-4.margin
+                            label(for='conditionsDesc') Condition Code Desc: 
+                            input#conditionsDesc.form-control(type='text'  name='conditionsDesc' required='true' value=lookuptable_search_result[0].dataValues.conditionsDesc)                    
+                    hr
+                    .form-row    
+                        .form-group.col-md-4.margin
+                            label(for='mobAids') Mobility Aid: 
+                            input#mobAids.form-control(type='text'  name='mobAids' required='true' value=lookuptable_search_result[0].dataValues.mobAids)  
+                        .form-group.col-md-4
+                            label(for='mobAidsDesc') Mobility Aid Desc: 
+                            input#mobAidsDescs.form-control(type='text' name='mobAidsDesc' required='true' value=lookuptable_search_result[0].dataValues.mobAidsDesc)   
+                    hr
+                    .form-row    
+                        .form-group.col-md-4.margin
+                            label(for='prefSpaceType') Preffered Space Type: 
+                            input#prefSpaceType.form-control(type='text' name='prefSpaceType' required='true' value=lookuptable_search_result[0].dataValues.prefSpaceType)  
+                        .form-group.col-md-4
+                            label(for='prefSpaceTypeDesc') Preferred Space Type Desc: 
+                            input#prefSpaceTypeDesc.form-control(type='text' name='prefSpaceTypeDesc' required='true' value=lookuptable_search_result[0].dataValues.prefSpaceTypeDesc)  
+                        .formfooter.col-md-12
+                            input.primarybutton.submit(type='submit' value='Update')
+                            input.secondarybutton.submit(type='button' value='Cancel' onclick="location.href='/lookuptables/list';")
+                
+
+    if  search_result_count === 0
+        h3 No Records Found
+    
+    if s_status == 'Record updated'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/lookuptables/list';") Go to Look-up Tables List
+
+    if s_status == 'Error updating record'
+        .notifydiv
+            h1=s_status
+            img.notifywarningicon(src='/images/warningnotify.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/lookuptables/list';") Go to Look-up Tables List
+
+   
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg

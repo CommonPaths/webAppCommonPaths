@@ -1,0 +1,469 @@
+extends layout
+
+block content
+    script.
+        let sortedArray = [];
+        function checkCompletedDate(valueSelected) {
+            if (valueSelected !== 'Under_Review') {
+                document.getElementById('dateCompleted').required = true;
+            } else {
+                document.getElementById('dateCompleted').required = false;
+            }
+        }
+
+        function sleep(seconds){
+            const waitUntil = new Date().getTime() + seconds*1000;
+            while(new Date().getTime() < waitUntil) true;
+        }
+
+        function getUserInput() {
+            const miles = prompt("Please enter bounding box distance in Miles.");
+
+            if (miles == null || miles == "" || isNaN(parseFloat(miles))) {
+               window.alert("Please Enter a valid Number");
+            } else {
+                return miles;
+            }
+        }
+
+        function getAddress() {
+            const originAddr = $('#pAddr').val();
+            const originCity = $('#pCity').val();
+            const originZip = $('#pZip').val();
+            return `${originAddr}, ${originCity}, ${originZip}`;
+        }
+
+        function getDestAddress() {
+            const destAddr = $('#dAddr').val();
+            const destCity = $('#dCity').val();
+            const destZip = $('#dZip').val();
+            return `${destAddr}, ${destCity}, ${destZip}`;
+        }
+
+        function createBoundingBox(distanceInKMeters, geoCodeData) {
+            const diffLatitude  = (distanceInKMeters / 6378) * (180 / Math.PI);
+            const diffLongitude = (distanceInKMeters / 6378) * (180 / Math.PI) / Math.cos(parseFloat(geoCodeData.lat) * Math.PI/180);
+            const trLat = parseFloat(geoCodeData.lat) + diffLatitude;
+            const trLon = parseFloat(geoCodeData.lon) + diffLongitude;
+            const blLat = parseFloat(geoCodeData.lat) - diffLatitude;
+            const blLon = parseFloat(geoCodeData.lon) - diffLongitude;
+
+            return [ trLat, trLon, blLat, blLon ];
+        }
+
+        async function destinationList(blLat, blLon, trLat, trLon) {
+            const otpEndpoint = $('#otpEndpoint').val();
+            const apiUrl = `${otpEndpoint.split('/plan')[0]}/index/stops`;
+            try {
+                const data = await $.get(apiUrl) 
+                let stopLat;
+                let stopLan;
+                let destinationArray = [];
+
+                for(let i=0; i< data.length; i++) {
+                    stopLat = parseFloat(data[i].lat);
+                    stopLon = parseFloat(data[i].lon);
+                    if(stopLat >= blLat && stopLat <= trLat && stopLon >= blLon && stopLon <= trLon) {
+                        destinationArray.push(data[i]);
+                    } else {
+                        continue
+                    }
+                }
+
+                return destinationArray;
+            } catch(e) {
+                window.alert("Error Connecting with OTP server. Please try again later")
+                return [];
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const radius = 6378;
+            const dLat = toRad(lat2-lat1);
+            const dLon = toRad(lon2-lon1);
+            const pLat = toRad(lat1);
+            const pLat2 = toRad(lat2);
+
+            const distance = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(pLat) * Math.cos(pLat2);
+            const arcDistance = 2 * Math.atan2(Math.sqrt(distance), Math.sqrt(1-distance)); 
+            return (radius * arcDistance) / 1.60934;
+            
+        }
+
+        function toRad(deg) {
+           return deg * Math.PI / 180;
+        }
+
+        async function coreReview() {
+            $('#dAddrSelect').empty();
+            const apiEndPoint = $('#geocoderEndpoint').val();
+            const tripRequestType = $('#tripRequestType').val()
+            const originAddress = getAddress();
+            const destinationAddress = getDestAddress();
+
+            let distanceInKMeters;
+            let miles;
+            let apiData;
+            let geoCodeData;
+
+            let originApiData;
+            let originGeoCodeData;
+            let destinationApiData;
+            let destinationGeoCodeData;
+
+            let trLat, trLon, blLat, blLon;
+            let destinationArray = [];
+            let reverseLookup = [];
+            let distance;
+            let select;
+            let opt;
+            let el;
+
+            if(tripRequestType === 'Core_Review') {
+                miles = getUserInput();
+                distanceInKMeters = (miles / 2) * 1.60934;
+                apiData = {
+                    format: 'json',
+                    addressdetails: 1,
+                    q: originAddress,
+                    limit: 1,
+                };
+
+                geoCodeData = await $.ajax({
+                    url: apiEndPoint,
+                    type: 'GET',
+                    dataType: 'json',
+                    data: apiData,
+                });
+
+                [trLat, trLon, blLat, blLon] = createBoundingBox(distanceInKMeters, geoCodeData[0]);
+                $('#pLat').val(geoCodeData[0].lat)
+                $('#pLon').val(geoCodeData[0].lon)
+
+                $('#trLat').val(trLat);
+                $('#trLon').val(trLon);
+                $('#blLat').val(blLat);
+                $('#blLon').val(blLon);
+                
+                destinationArray = await destinationList(blLat, blLon, trLat, trLon);
+
+                $('#dAddrSelect').attr({hidden: false});
+                select = document.getElementById("dAddrSelect");
+
+                if(destinationArray.length > 1) {
+                    
+                    for(let j=0; j< destinationArray.length; j++) {
+                       distance = calculateDistance(geoCodeData[0].lat, geoCodeData[0].lon, destinationArray[j].lat, destinationArray[j].lon);
+                       destinationArray[j].distance = distance;
+                    }
+
+                    sortedArray = destinationArray.sort((a,b) => a.distance - b.distance);
+
+                    el = document.createElement("option");
+                    el.textContent = 'Choose a Destination or Enter an address';
+                    el.value = 'Choose a Destination or Enter an address';
+                    select.appendChild(el);
+
+                    
+                    for(let k=0; k< sortedArray.length; k++ ) {
+                        opt = sortedArray[k].name;
+                        el = document.createElement("option");
+                        el.textContent = `(${sortedArray[k].id}) ${opt} (${sortedArray[k].distance.toFixed(2)} miles)`;
+                        el.value = opt;
+                        select.appendChild(el);
+                    }
+                } else {
+                    el = document.createElement("option");
+                    el.textContent = `No Stop Found`;
+                    el.value = `No Stop Found`;
+                    select.appendChild(el);
+                }
+            } else {
+                if(!$('#dAddrSelect').is(":hidden")) {
+                    $('#dAddrSelect').attr({hidden: true});
+                }
+
+                originApiData = {
+                    format: 'json',
+                    addressdetails: 1,
+                    q: originAddress,
+                    limit: 1,
+                };
+
+                destinationApiData = {
+                    format: 'json',
+                    addressdetails: 1,
+                    q: destinationAddress,
+                    limit: 1,
+                };
+
+                originGeoCodeData = await $.ajax({
+                    url: apiEndPoint,
+                    type: 'GET',
+                    dataType: 'json',
+                    data: originApiData,
+                });
+
+                sleep(1);
+
+                destinationGeoCodeData = await $.ajax({
+                    url: apiEndPoint,
+                    type: 'GET',
+                    dataType: 'json',
+                    data: destinationApiData,
+                });
+
+                $('#pLat').val(originGeoCodeData[0].lat);
+                $('#pLon').val(originGeoCodeData[0].lon);
+                $('#dLat').val(destinationGeoCodeData[0].lat);
+                $('#dLon').val(destinationGeoCodeData[0].lon);
+            }
+        }
+
+        async function onAddressChange(event) {
+            const selectedIndex = document.getElementById("dAddrSelect").selectedIndex;
+            const name = sortedArray[selectedIndex - 1].name;
+            const lat = sortedArray[selectedIndex - 1].lat;
+            const lon = sortedArray[selectedIndex - 1].lon;
+            $('#dLat').val(lat);
+            $('#dLon').val(lon);
+
+            const originAddress = getAddress();
+            const apiEndPoint = $('#geocoderEndpoint').val();
+            const geoCodeAPIEndPoint = apiEndPoint.split('search');
+
+            const reverseLookupAPI = `${geoCodeAPIEndPoint[0]}/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+            const reverseLookupAPIData = {
+                                             format: 'json',
+                                             addressdetails: 1,
+                                             q: originAddress,
+                                             limit: 1,
+                                         };
+
+            const reverseLookupGeoCodeData = await $.ajax({
+                                                url: reverseLookupAPI,
+                                                type: 'GET',
+                                                dataType: 'json',
+                                                data: reverseLookupAPIData,
+                                                error: ((err) => {
+                                                    window.alert("Error connecting with Geocode endpoint")
+                                                })
+                                            });
+
+            let city;
+            let postCode = reverseLookupGeoCodeData.address.postcode;
+
+            if(postCode.split('-')) {
+                postCode = postCode.split('-')[0]
+            } 
+
+            if(reverseLookupGeoCodeData.address.city == undefined) {
+                city = reverseLookupGeoCodeData.address.town
+            } else {
+                city = reverseLookupGeoCodeData.address.city
+            }
+
+            $('#dAddr').val(name);
+            $('#dCity').val(city);
+            $('#dZip').val(postCode);
+        }
+        
+    input(type='hidden' id='geocoderEndpoint' value=geocoderEndpoint)
+    input(type='hidden' id='otpEndpoint' value=otpEndpoint)
+    input(type='hidden' id='trLat')
+    input(type='hidden' id='trLon')
+    input(type='hidden' id='blLat')
+    input(type='hidden' id='blLon')
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/tripRequests/list') Trip History
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Update Trip History
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+       
+    if tripRequestSearchResult && !(search_result_count === 0)
+        P
+        .topbar
+            .enterdetail
+                form(action="" method="GET")
+                    label(for = "id")
+                    input.searchbox(
+                        type="search"
+                        id="id"
+                        name="id"
+                        required='true'
+                        placeholder='search by trip request id number'
+                        value=''
+                        )
+  
+        .formcontainer
+            form(method='POST' action='')
+                .form-row
+                    .form-group.col-md-3
+                        label(for='id') TripHist.ID:  
+                        input#id.form-control.form-control-sm(type='text' placeholder='Trip Request ID' name='id' readonly required='true' 
+                            value=tripRequestSearchResult[0].dataValues.id)
+                    .form-group.col-md-3
+                        label(for='bookingId') Bkg.ID:  
+                        input#bookingId.form-control.form-control-sm(type='text' placeholder='Booking ID' name='bookingId' readonly 
+                            value=tripRequestSearchResult[0].dataValues.bookingId)
+
+                    .form-group.col-md-3
+                        label(for='clientId') Client ID of the Trip History : 
+                        input#clientsId.form-control.form-control-sm(type='text' placeholder='Existing Client ID' name='clientsId' readonly required='true' 
+                            value=tripRequestSearchResult[0].dataValues.ClientProfileModel.clientId)
+                    .form-group.col-md-3
+                        label(for='trips') Trips Count : 
+                        input#trips.form-control.form-control-sm(type='text' placeholder='Trips Count' name='trips' required='true'
+                            value=tripRequestSearchResult[0].dataValues.trips)
+
+                    .form-group.col-md-2
+                        label(for='pName') Origin Address Name: 
+                        input#pName.form-control.form-control-sm(type='text' placeholder='Origin Name' name='pName' 
+                            value=tripRequestSearchResult[0].dataValues.pName)
+                    .form-group.col-md-3
+                        label(for='pAddr') Origin Address: 
+                        input#pAddr.form-control.form-control-sm(type='text' placeholder='Origin Address' name='pAddr' required='true' 
+                            value=tripRequestSearchResult[0].dataValues.pAddr)
+                    .form-group.col-md-2
+                        label(for='pUnit') Origin Unit Name: 
+                        input#pUnit.form-control.form-control-sm(type='text' placeholder='Origin Unit Name' name='pUnit' 
+                            value=tripRequestSearchResult[0].dataValues.pUnit)
+                    .form-group.col-md-2
+                        label(for='pCity') Origin City: 
+                        input#pCity.form-control.form-control-sm(type='text' placeholder='Origin City' name='pCity' required='true' 
+                            value=tripRequestSearchResult[0].dataValues.pCity)
+                    .form-group.col-md-1   
+                        label(for='pZip') Origin Zip: 
+                        input#pZip.form-control.form-control-sm(type='number' placeholder='Origin Zip Code' name='pZip' required='true' 
+                            value=tripRequestSearchResult[0].dataValues.pZip)
+                    .form-group.col-md-1
+                        label(for='pLat') Origin Lat
+                        input#pLat.form-control.form-control-sm(type='text' placeholder='Origin Lat' name='pLat' required='true' value=tripRequestSearchResult[0].dataValues.pLat) 
+                    .form-group.col-md-1
+                        label(for='pLon') Origin Lon
+                        input#pLon.form-control.form-control-sm(type='text' placeholder='Origin Lon' name='pLon' required='true' value=tripRequestSearchResult[0].dataValues.pLon)
+                    .form-group.col-md-2
+                        label(for='dName') Destination Address Name: 
+                        input#pName.form-control.form-control-sm(type='text' placeholder='Destination Name' name='dName'  
+                            value=tripRequestSearchResult[0].dataValues.dName) 
+                    .form-group.col-md-3
+                        label(for='dAddr') Destination Address: 
+                        input#dAddr.form-control.form-control-sm(type='text' placeholder='Destination Address' name='dAddr' required='true' value=tripRequestSearchResult[0].dataValues.dAddr onclick='coreReview()')
+                        select.form-control.form-control-sm(hidden='true' id="dAddrSelect" name='dAddrSelect' value='' onchange='onAddressChange(event)')
+                            option Choose a Destination or Enter an address
+                    .form-group.col-md-2          
+                        label(for='dUnit') Destination Unit Name: 
+                        input#dUnit.form-control.form-control-sm(type='text' placeholder='Destination Unit Name' name='dUnit' 
+                            value=tripRequestSearchResult[0].dataValues.dUnit)
+                    .form-group.col-md-2           
+                        label(for='dCity') Destination City: 
+                        input#pCity.form-control.form-control-sm(type='text' placeholder='Destination City' name='dCity' required='true' 
+                            value=tripRequestSearchResult[0].dataValues.dCity)
+                    .form-group.col-md-1
+                        label(for='dZip') Dest. Zip: 
+                        input#dZip.form-control.form-control-sm(type='number' placeholder='Dest. Zip Code' name='dZip' required='true' 
+                            value=tripRequestSearchResult[0].dataValues.dZip)
+                    .form-group.col-md-1
+                        label(for='dLat') Destination Lat
+                        input#dLat.form-control.form-control-sm(type='text' placeholder='Destination Lat' name='dLat' required='true' value=tripRequestSearchResult[0].dataValues.dLat) 
+                    .form-group.col-md-1
+                        label(for='dLon') Destination Lon
+                        input#dLon.form-control.form-control-sm(type='text' placeholder='Destination Lon' name='dLon' required='true' value=tripRequestSearchResult[0].dataValues.dLon)
+                    .form-group.col-md-6
+                        label(for='DateAdded') Date Trip Request Added: 
+                        input#DateAdded.form-control.form-control-sm(type='date' name='DateAdded' required='true' 
+                            value=tripRequestSearchResult[0].dataValues.DateAdded)
+                    .form-group.col-md-6
+                        label(for='daysOfWeekRequested') Day(s) of Week Requested:
+                        select#daysOfWeekRequested.form-control.form-control-sm(type='select' multiple name = "daysOfWeekRequested" 
+                            value=tripRequestSearchResult[0].dataValues.daysOfWeekRequested)
+                            option(value=tripRequestSearchResult[0].dataValues.daysOfWeekRequested.toString(), selected, label=tripRequestSearchResult[0].dataValues.daysOfWeekRequested.toString()) 
+                            option(value='Mo', label="Monday")
+                            option(value='Tu', label= "Tuesday")
+                            option(value='We', label= "Wednesday")
+                            option(value='Th', label= "Thursday")
+                            option(value='Fr', label= "Friday")
+                            option(value='Sa', label= "Saturday")
+                            option(value='Su', label= "Sunday")
+                    .form-group.col-md-3
+                        label(for='tripRequestType') Trip Request Type: 
+                        select#tripRequestType.form-control.form-control-sm(type='select' name="tripRequestType" value=tripRequestSearchResult[0].dataValues.tripRequestType)
+                            option(value=tripRequestSearchResult[0].dataValues.tripRequestType selected, label=tripRequestSearchResult[0].dataValues.tripRequestType)
+                            option(value='Demand', label="Demand")
+                            option(value='Standing', label= "Standing")
+                            option(value='Core_Review', label= "Core_Review")
+                    .form-group.col-md-3
+                        label(for='priority') Priority:
+                        select#priority.form-control.form-control-sm(type='select' name = "priority" value='')
+                            option(value=tripRequestSearchResult[0].dataValues.priority, selected, label=tripRequestSearchResult[0].dataValues.priority) 
+                            option(value='High', label="High")
+                            option(value='Medium', label= "Medium")
+                            option(value='Low', label= "Low")
+                    .form-group.col-md-3
+                        label(for='tripTime') Trip Time: 
+                        input#tripTime.form-control.form-control-sm(type='time' name='tripTime'
+                            value=tripRequestSearchResult[0].dataValues.tripTime)
+                    .form-group.col-md-3
+                        label(for='appointmentTime') Appointment Time: 
+                        input#appointmentTime.form-control.form-control-sm(type='time' name='appointmentTime' 
+                            value=tripRequestSearchResult[0].dataValues.appointmentTime)
+                    .form-group.col-md-3
+                        label(for='status') Status:
+                        select#status.form-control.form-control-sm(type='select' required='true' name="status" value=tripRequestSearchResult[0].dataValues.status onmousedown="this.value=''" onchange="checkCompletedDate(this.value);")
+                            option(value=tripRequestSearchResult[0].dataValues.status, selected=true, label=tripRequestSearchResult[0].dataValues.status) 
+                            option(value='Under_Review', label="Under Review")
+                            option(value='Access', label="Access")
+                            option(value='Bus', label="Bus")
+                    .form-group.col-md-3
+                        label(for='dateCompleted') Date Pathway Completed: 
+                        input#dateCompleted.form-control.form-control-sm(type='date' placeholder='Date Pathway Completed' name='dateCompleted' 
+                            value=tripRequestSearchResult[0].dataValues.dateCompleted)
+                    .form-group.col-md-6
+                        label(for='officersId') Assigned Officer: 
+                        select#officersId.form-control.form-control-sm(type='select' required='true' name = "officersId" 
+                            value=tripRequestSearchResult[0].dataValues.officersId)
+                            option(value=tripRequestSearchResult[0].dataValues.officersId, selected, label=tripRequestSearchResult[0].dataValues.officersId + ': ' + tripRequestSearchResult[0].dataValues.OfficerModel.lastName + ', ' + tripRequestSearchResult[0].dataValues.OfficerModel.firstName) 
+                            if officers
+                                each item , i in Object.entries(officers)
+                                    option(value=item[1].id, label=item[1].id + ": " + item[1].lastName + ", " + item[1].firstName)
+                    .form-group.col-md-12
+                        label(for='notes') Notes: 
+                        input#notes.form-control.form-control-sm(type='text' placeholder='enter notes' name='notes' 
+                            value=tripRequestSearchResult[0].dataValues.notes)
+                    p
+                    .formfooter
+                        button.primarybutton(type='submit') Save Changes
+                        input.secondarybutton.buttonmargin(type='button' value='Cancel' onclick="location.href='/tripRequests/list';")
+            
+    if  search_result_count === 0
+        p No Records Found
+    
+    if s_status == 'Record updated'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip Requests
+
+
+    if s_status == 'Error updating record'
+        .notifydiv
+            h1=s_status
+            img.notifywarningicon(src='/images/warningnotify.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip Requests
+
+
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg
+    
+    
+ 
+    

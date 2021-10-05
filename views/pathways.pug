@@ -1,0 +1,264 @@
+extends layout
+    
+block content
+
+    script.
+        let loggedUserRole = !{JSON.stringify(getLoggedUserRole)};
+        if(loggedUserRole == 'agency'){
+            let tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.cookie = "user=" +loggedUserRole +"; expires=" + tomorrow +"; path=/";
+        }
+        function detailFormatter(index, row, $detail) {
+            $detail.ready(function(){
+                if( loggedUserRole === 'agency'){
+                    const viewPathway = "<a class='secondarybutton secondaryLinkButton' href=" + "'../pathwayItinerary/view" + "?tripRequestId=" + row.tripRequestsId + "'" +  "</a> View-Pathway  ";
+                    const barriers = "<p> Barriers: " + row.barriers + "</p>";
+                    const notes = "<p> Notes: " + row.notes + "</p>"; 
+                    $detail.append(barriers, notes, viewPathway);
+                } else {
+                    const viewPathway = "<a class='secondarybutton secondaryLinkButton' href=" + "'../pathwayItinerary/view" + "?tripRequestId=" + row.tripRequestsId + "'" +  "</a> View-Pathway  ";
+                    const editpathway = "<a class='secondarybutton secondaryLinkButton' href=" + "'../pathwayItinerary/update" + "?tripRequestId=" + row.tripRequestsId + "'" +  "</a> Edit-Pathway  ";
+                    const barriers = "<p> Barriers: " + row.barriers + "</p>";
+                    const notes = "<p> Notes: " + row.notes + "</p>"; 
+                    $detail.append(barriers, notes, viewPathway, editpathway);
+
+                }
+            });
+        }
+
+        function mapPathwaysOnList() {
+            let $table = $('#table');
+            let viewData = $table.bootstrapTable('getData', {'useCurrentPage':'true'});
+            let pathwaysCurrentViewRecords = [];
+            let pathwaysAllRecord = !{JSON.stringify(adapathwayList)};
+
+            clearMap();
+
+            for (let i=0; i < viewData.length; i++) {
+                pathwaysCurrentViewRecords.push(pathwaysAllRecord.find(element => element.id == parseInt(viewData[i]['id'])));
+            }
+            
+            drawPathways(pathwaysCurrentViewRecords,'addToMap' , '#00c77e');
+
+        }
+
+        function rowClick(row, $element, field) {
+
+            function markTableSelectedOriginDest(latLngFromParam, latLngToParam) {
+                L.marker(latLngFromParam).bindTooltip(`From, PID:${row.id}`).addTo(map);
+                L.marker(latLngToParam).bindTooltip(`To, PID:${row.id}`).addTo(map); 
+            }
+
+            let pathwaysRecord = !{JSON.stringify(pathwaylistFiltered)};
+            let clickedRowData = pathwaysRecord.find(element => element.id == row.id);
+            let data = JSON.parse(clickedRowData.pathwayItinerary);
+            let latLngFrom;
+            let latLngTo;
+
+            if (clickedRowData.pathwayItinerary) {
+                latLngFrom = [data.plan.from.lat, data.plan.from.lon];
+                latLngTo = [data.plan.to.lat, data.plan.to.lon];
+                markTableSelectedOriginDest(latLngFrom, latLngTo);
+            } else {
+                if (clickedRowData.TripRequestModel.pLat && 
+                        clickedRowData.TripRequestModel.pLon && 
+                        clickedRowData.TripRequestModel.dLat && 
+                        clickedRowData.TripRequestModel.dLon) {
+
+                    latLngFrom = [clickedRowData.TripRequestModel.pLat, clickedRowData.TripRequestModel.pLon];
+                    latLngTo = [clickedRowData.TripRequestModel.dLat, clickedRowData.TripRequestModel.dLon];
+                    markTableSelectedOriginDest(latLngFrom, latLngTo); 
+                } else {
+                    geocodeAddressOnly(clickedRowData.TripRequestModel.pAddr + ', ' +
+                                        clickedRowData.TripRequestModel.pCity + ', ' +
+                                        clickedRowData.TripRequestModel.pZip).then(geocodeResult => {
+                        latLngFrom = [geocodeResult[0][0]['lat'], geocodeResult[0][0]['lon']];
+                        geocodeAddressOnly(clickedRowData.TripRequestModel.dAddr + ', ' +
+                                            clickedRowData.TripRequestModel.dCity + ', ' +
+                                            clickedRowData.TripRequestModel.dZip).then(geocodeResult => {
+                            latLngTo = [geocodeResult[0][0]['lat'], geocodeResult[0][0]['lon']];
+                            markTableSelectedOriginDest(latLngFrom, latLngTo);
+                        }).catch(function(err) {
+                            alert('geocoding error: ' + err.toString());
+                        });
+                    }).catch(function(err) {
+                        alert('geocoding error: ' + err.toString());
+                    });
+                }
+
+            }
+        }
+
+        function clearMapItems() {
+            clearMap();
+        }
+
+        window.icons = {
+            columns: 'ion-md-menu',
+            fullscreen: 'ion-md-expand',
+            export: 'ion-md-download',
+            detailOpen: 'ion-md-arrow-down',
+            detailClose: 'ion-md-arrow-up',
+            toggleOff: 'ion-md-arrow-down',
+            toggleOn: 'ion-md-arrow-up'   
+        }
+
+    .header
+        a.pagetitle
+          | Pathway List
+        .gradient
+            .username #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    input(type='hidden' id='otpEndpoint' value=settingsRecord.otpEndpoint)
+    input(type='hidden', id='osmEndpoint' value=settingsRecord.osmEndpoint)
+    input(type='hidden', id='geocoderEndpoint' value=settingsRecord.geocoderEndpoint)
+    input(type='hidden', id='bingMapKey' value=settingsRecord.bingMapKey)
+    input(type='hidden', id='historicPicMetaDataLayersSeattle' value=historicPicMetaDataLayersSeattle)
+    input(type='hidden', id='customlayerID' value=settingsRecord.userSettings)
+    input(type='hidden', id='settingsRecordBbox' value=settingsRecord.bbox)
+    input(type='hidden', id='fieldReviewRecords' value=fieldReviewSearchResult)
+
+    input(type='hidden', id='cognitoRegion' value=settingsRecord.cognitoRegion)
+    input(type='hidden', id='s3AccessKeyId' value=settingsRecord.s3AccessKeyId)
+    input(type='hidden', id='s3SecretAccessKey' value=settingsRecord.s3SecretAccessKey)
+    input(type='hidden', id='s3BucketName' value=settingsRecord.s3BucketName)
+
+    input(type='hidden', id='transportThunderforestKey' value=settingsRecord.transportTileLayerKey)
+    input(type='hidden', id='customTileLayerName' value=settingsRecord.customTileLayerName)
+    input(type='hidden', id='mapboxAccountName' value=settingsRecord.mapboxAccountName)
+    input(type='hidden', id='mapboxAccountStyleID' value=settingsRecord.mapboxAccountStyleID)
+    input(type='hidden', id='mapboxAccountKey' value=settingsRecord.mapboxAccountKey)
+
+    input(type='hidden' id='ADAPathwayRecords', value=adapathwayList)
+
+
+    #toolbar.tableheaderTripsFilter
+    form(method='POST' action='')
+        .form-inline            
+            label(for='dateStart' class="col-form-label") &nbsp; &nbsp; Date-Start: 
+            input#dateFrom.form-control.form-control-md(type='date' placeholder='Start Date Default=90Days from today' name='dateStart' required='true' value=dateStart)
+            
+            label(for='dateEnd' class="col-form-label") &nbsp; Date-End: 
+            input#dateEnd.form-control.form-control-md(type='date' placeholder='Pick Date To Default=today' name='dateEnd' required='true' value=dateEnd)
+
+            p  &nbsp; &nbsp;
+            input.primarybuttonTripsFilter(type='submit' value='Filter' ) 
+            i &nbsp; &nbsp; Default Filter, 90 days from today's date
+
+    .tablecontainer.table-sm
+        table.table.btn-table.table-responsive.w-auto.table-striped.table-borderless(
+            id="table"
+            data-toggle="table"
+            data-show-toggle="true"
+            data-toolbar="#toolbar" 
+            data-search="true" 
+            data-show-refresh="false"
+            data-show-fullscreen="true" 
+            data-show-columns="true" 
+            data-show-columns-toggle-all="true" 
+            data-detail-view="true" 
+            data-show-export="true"
+            data-detail-formatter="detailFormatter" 
+            data-minimum-count-columns="2"  
+            data-pagination="true" 
+            data-page-list="[10, 25, 50, 100, all]" 
+            data-show-footer="true"
+            data-icons-prefix="icon"
+            data-icons="icons"
+            data-show-detail-view="true"
+            data-page-size="5"
+           )
+            
+            thead.bg-color
+                tr 
+                    if getLoggedUserRole === 'agency'
+                        th
+                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button')
+                    else 
+                        th
+                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button')
+                    if getLoggedUserRole === 'admin'
+                        th
+                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button') 
+                    th(data-sortable="true" data-field="id") P.ID
+                    th(data-sortable="true" data-field="tripRequestsId") TripH.ID
+                    th(data-sortable="true" data-field="bookingId" data-visible="false") Bkg.ID
+                    th(data-sortable="true" data-field="clientId") ClientID
+                    th(data-sortable="true" data-field="clientName" data-visible="false") C.Name
+                    th(data-sortable="true" data-field="pName") OrgNameUnit
+                    th(data-sortable="true" data-field="pAddr") OrgAddr
+                    th(data-sortable="true" data-field="pCity") OrgCity
+                    th(data-sortable="true" data-field="pZip") OrgZip  
+                    th(data-sortable="true" data-field="dName") DestNameUnit 
+                    th(data-sortable="true" data-field="dAddr") DestAddr
+                    th(data-sortable="true" data-field="pCity") DestCity 
+                    th(data-sortable="true" data-field="dZip") DestZip   
+                    th(data-sortable="true" data-field="status") Status
+                    th(data-sortable="true" data-field="dateCompleted") Completed
+                    th(data-sortable="true" data-field="priority") Priority
+                    th(data-sortable="true" data-field="officersId") Officer
+                    th(data-sortable="true" data-field="barriers" data-visible="false") Barriers 
+                    th(data-sortable="true" data-field="notes" data-visible="false") Notes 
+                    if getLoggedUserRole === 'admin'
+                        th(data-sortable="true" data-field="deletedAt") deletedAt
+                        th(data-sortable="true" data-field="updatedAt") updatedAt 
+                    
+            tbody
+                if pathwaylistFiltered 
+                    each item in pathwaylistFiltered
+                        tr   
+                            td
+                                if (getLoggedUserRole === 'agency') 
+                                    a(href='/pathwayItinerary/view?tripRequestId=' + item.tripRequestsId data-toggle='tooltip' title='Edit Profile')
+                                        i.far.fa-eye.customedit
+                                else 
+                                    a(href='/pathwayItinerary/update?tripRequestId=' + item.tripRequestsId data-toggle='tooltip' title='Edit Profile')
+                                        i.fas.fa-pen.customedit
+                                
+                            if getLoggedUserRole === 'admin'
+                                td 
+                                    a(href='/pathwayItinerary/' + item.id + '/delete' + '?tripRequestId=' + item.tripRequestsId  data-toggle='tooltip' title='Delete/Restore')
+                                        i.fas.fa-trash.customedit  
+                            td(align='center') #{item.id}
+                            td(align='center') #{item.tripRequestsId}
+                            td(align='center') #{item.TripRequestModel.bookingId}
+                            td(align='center') #{item.TripRequestModel.ClientProfileModel.clientId}
+                            td(align='center') #{item.TripRequestModel.ClientProfileModel.clientName}
+                            td(align='center') #{item.TripRequestModel.pName + ' , ' + item.TripRequestModel.pUnit}
+                            td(align='center') #{item.TripRequestModel.pAddr}                    
+                            td(align='center') #{item.TripRequestModel.pCity}
+                            td(align='center') #{item.TripRequestModel.pZip}
+                            td(align='center') #{item.TripRequestModel.dName + ' , ' + item.TripRequestModel.dUnit}
+                            td(align='center') #{item.TripRequestModel.dAddr}
+                            td(align='center') #{item.TripRequestModel.dCity}
+                            td(align='center') #{item.TripRequestModel.dZip}
+                            td(align='center') #{item.TripRequestModel.status}
+                            td(align='center') #{item.TripRequestModel.dateCompleted}
+                            td(align='center') #{item.TripRequestModel.priority}
+                            td(align='center') #{item.TripRequestModel.OfficerModel.lastName + ", " + item.TripRequestModel.OfficerModel.firstName}
+                            td(align='center') #{item.barriers.join(', ')}
+                            td(align='center') #{item.TripRequestModel.notes}
+                            if getLoggedUserRole === 'admin'
+                                td(align='center') #{item.deletedAt}
+                                td(align='center') #{item.updatedAt}
+            tfoot
+                tr
+                    th(colspan='12')
+    
+        button.primarybutton(type='button' onclick='mapPathwaysOnList()') Load-Map 
+        button.secondarybutton(type='button' onclick='clearMapItems()') Clear 
+    
+    script.
+        let $table = $('#table');
+        $table.bootstrapTable({
+            onSearch: clearMapItems,
+            onPageChange: clearMapItems,
+            onClickRow: rowClick,
+        })
+
+
+
+    #map
+    script(src='/javascripts/leafletOTP.js')

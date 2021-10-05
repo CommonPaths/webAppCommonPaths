@@ -1,0 +1,208 @@
+extends layout
+
+block content
+    .header
+        a.pagetitle
+          | Formulate Pathway Itinerary
+
+    script.
+        function formulateSelected(value) { alert('Loading Itinerary Option: ' +  (parseInt(value) + 1).toString()); formulateRoute(); }
+        function selectedPathwayData() {
+            let routeData = document.getElementById('itinData').value;   
+            let selectedItinNumber = document.getElementById('numItin').value;
+            let transitInstruction;
+            if (routeData === '' ) { return []; }
+            transitInstruction = JSON.stringify(createRouteInstruction(JSON.parse(routeData), selectedItinNumber))
+            return [routeData, selectedItinNumber, transitInstruction,
+                document.getElementById('ADAPathwaySearchResultId').value,
+                Math.round((JSON.parse(routeData).plan.itineraries[selectedItinNumber].duration)/60)]; 
+        }
+
+    script.
+        function displayTransitInstruction() {
+            function putBox(size, label, value) {
+                let labelBox = document.createElement('label');
+                let fromBox = document.createElement('input');
+                labelBox.setAttribute('for', label);
+                fromBox.setAttribute('type', 'text');
+                labelBox.innerHTML = label+':';
+                fromBox.setAttribute('name', label);
+                fromBox.setAttribute('size', size);
+                fromBox.setAttribute('value', value);
+                fromBox.setAttribute('readonly', true);
+                formSection.appendChild(labelBox);
+                formSection.appendChild(fromBox);
+            }
+            if (document.body.contains(document.getElementById('instructionId'))) { return; }
+            else if (document.getElementById('itinData').value === '') {
+                window.alert('No Data, First Formulate!');
+                return; 
+            }
+            let routeData = document.getElementById('itinData').value;
+            let selectedItinNumber = document.getElementById('numItin').value;
+            let transitInstruction = createRouteInstruction(JSON.parse(routeData), selectedItinNumber);
+            
+            let divInstruction = document.getElementById('transitInstruction');
+            let formInstruction = document.createElement('form');
+            formInstruction.setAttribute('action', '');
+            formInstruction.setAttribute('id', 'instructionId');
+            divInstruction.appendChild(formInstruction);
+            let formSection = document.createElement('section');
+            formInstruction.appendChild(formSection);
+            formSection.appendChild(document.createElement('hr'));
+            let tripDuration = Math.round((JSON.parse(routeData).plan.itineraries[selectedItinNumber].duration)/60);
+            putBox(8, 'Trip Duration Estimated Total (min.)', tripDuration);
+            formSection.appendChild(document.createElement('hr'));
+
+            for (i = 0; i < transitInstruction.length; i++) {
+                if (transitInstruction[i].mode === 'WALK') {
+                    putBox(37, 'From', transitInstruction[i].from);
+                    putBox(8, '&nbsp; &nbsp; &nbsp; Mode', transitInstruction[i].mode);
+                    putBox(10, '&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Dist.Total(ft.)', transitInstruction[i].walkDistance);
+                    putBox(37, '&nbsp; &nbsp; &nbsp; To', transitInstruction[i].to);
+                    formSection.appendChild(document.createElement('br'));
+                    for (s = 0; s < transitInstruction[i].steps.length; s++) {
+                        putBox(8, 'Instruction', transitInstruction[i].steps[s].relativeDirection);
+                        putBox(13, '&nbsp; &nbsp; &nbsp; Direction', transitInstruction[i].steps[s].absoluteDirection);
+                        putBox(20, '&nbsp; &nbsp; &nbsp; St.-Name', transitInstruction[i].steps[s].streetName);
+                        putBox(10, '&nbsp; &nbsp; &nbsp; Dist.(ft.)', transitInstruction[i].steps[s].distance);
+                        putBox(10, '&nbsp; &nbsp; &nbsp; Slope', transitInstruction[i].steps[s].slope);
+                        formSection.appendChild(document.createElement('br'));
+                    }
+                }
+                else if (transitInstruction[i].mode === 'BUS' || transitInstruction[i].mode === 'TRAM') {
+                    putBox(37, 'From', transitInstruction[i].from);
+                    putBox(8, '&nbsp; &nbsp; &nbsp; Mode', transitInstruction[i].mode);
+                    putBox(37, '&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; To', transitInstruction[i].to);
+                    formSection.appendChild(document.createElement('br')); 
+                    putBox(10, 'Bus-Stop-From', transitInstruction[i].busStopFrom.name);
+                    putBox(10, '&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Bus#', transitInstruction[i].busNumber);
+                    putBox(10, '&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Bus-Stop-To', transitInstruction[i].busStopTo.name);
+                }
+                formSection.appendChild(document.createElement('hr'));
+            }
+            $([document.documentElement, document.body]).animate({scrollTop: $('#transitInstruction').offset().top}, 2000);
+        }
+
+    input(type='hidden' id='itinData' value='')
+
+    input(type='hidden' id='otpEndpoint' value=settingsRecord.otpEndpoint)
+    input(type='hidden', id='osmEndpoint' value=settingsRecord.osmEndpoint)
+    input(type='hidden', id='geocoderEndpoint' value=settingsRecord.geocoderEndpoint)
+    input(type='hidden', id='bingMapKey' value=settingsRecord.bingMapKey)
+    input(type='hidden', id='customlayerID' value=settingsRecord.userSettings)
+    input(type='hidden', id='settingsRecordBbox' value=settingsRecord.bbox)
+
+    input(type='hidden', id='cognitoRegion' value=settingsRecord.cognitoRegion)
+    input(type='hidden', id='s3AccessKeyId' value=settingsRecord.s3AccessKeyId)
+    input(type='hidden', id='s3SecretAccessKey' value=settingsRecord.s3SecretAccessKey)
+    input(type='hidden', id='s3BucketName' value=settingsRecord.s3BucketName)
+
+    input(type='hidden', id='fieldReviewRecords' value=fieldReviewSearchResult)
+    input(type='hidden', id='historicPicMetaDataLayersSeattle' value=historicPicMetaDataLayersSeattle)
+
+    input(type='hidden', id='transportThunderforestKey' value=settingsRecord.transportTileLayerKey)
+    input(type='hidden', id='customTileLayerName' value=settingsRecord.customTileLayerName)
+    input(type='hidden', id='mapboxAccountName' value=settingsRecord.mapboxAccountName)
+    input(type='hidden', id='mapboxAccountStyleID' value=settingsRecord.mapboxAccountStyleID)
+    input(type='hidden', id='mapboxAccountKey' value=settingsRecord.mapboxAccountKey)
+
+
+    input(type='hidden' id='ADAPathwayRecords', value=ADAPathwayRecords)
+
+    if search_result_count !== 0
+        input(type='hidden' id='ADAPathwaySearchResultId', value=parseInt(ADAPathwaySearchResult[0].id))
+    else 
+        input(type='hidden' id='ADAPathwaySearchResultId', value='')
+
+    .container-fluid
+        .form-row
+            .form-group.col-md-3.space
+                label(for='fromAddress') From/Origin (Address/Coordinate):
+                input#fromAddress.form-control.form-control-sm(type='text' placeholder='Type the start address or click map for coordinate' 
+                    value=tripRequestSearchResult[0].pAddr + ', ' + tripRequestSearchResult[0].pCity + ', ' + tripRequestSearchResult[0].pZip )
+            
+            .form-group.col-md-2
+                label(for='maxWalkDistance') Max Walk (ft.):
+                input#maxWalkDistance.form-control.form-control-sm(type='text' placeholder='maxWalkDistance' value=blockDistance)
+            .form-group.col-md-2
+                label(for='maxTransfers') Max Transfers:
+                input#maxTransfers.form-control.form-control-sm(type='text' placeholder='maxTransfers' value='1')
+            .form-group.col-md-2
+                label(for='arriveBy') Arrive / Depart :
+                select#arriveBy.form-control.form-control-sm(type='select' name = "arriveBy" required='true' value='false')
+                    option(value='false' selected='false', label="DepartBy")
+                    option(value='true', label="ArriveBy")
+            .form-group.col-md-2
+                label(for='date') Date/#{timeSelector[1]}:
+                input#date.form-control.form-control-sm(type='datetime-local' placeholder='Departure/Arrival Date/time' required='true' value=tripRequestSearchResult[0].DateAdded + 'T' + timeSelector[0])
+        .form-row
+            .form-group.col-md-3.space
+                label(for='toAddress') To/Destination (Address/Coordinate):
+                input#toAddress.form-control.form-control-sm(type='text' placeholder='Type the end address or click map for coordinate' 
+                    value=tripRequestSearchResult[0].dAddr + ', ' + tripRequestSearchResult[0].dCity + ', ' + tripRequestSearchResult[0].dZip)
+
+            .form-group.col-md-2
+                label(for='wheelchair') Wheelchair:
+                select#wheelchair.form-control.form-control-sm(type='select' name = "wheelchair" required='true' value='false')
+                    option(value='false' selected='false', label="false")
+                    option(value='true', label="true")
+            .form-group.col-md-2
+                label(for='maxSlope') Max Slope:
+                input#maxSlope.form-control.form-control-sm(type='text' placeholder='maxSlope' required='true' value='0.0')
+            .form-group.col-md-2
+                label(for='optimize') Optimize :
+                select#optimize.form-control.form-control-sm(type='select' name = "optimize" value='')
+                    option(value='' , label="--Select--")
+                    option(value='FLAT' , label="FLAT")
+                    option(value='GREENWAYS', label="WALK")
+                    option(value='QUICK', label= "QUICK")
+                    option(value='SAFE', label= "SAFE")
+                    option(value='TRANSFERS', label= "TRANSFERS")
+            .form-group.col-md-2
+                label(for='mode') Travel By (Modes):
+                select#mode.form-control.form-control-sm(type='select' name = "mode" multiple required='true' value='TRANSIT,WALK')
+                    option(value='TRANSIT' selected='', label="TRANSIT")
+                    option(value='WALK', selected='', label="WALK")
+                    option(value='BUS', label= "BUS")
+                    option(value='TRAM', label= "TRAM")
+                    option(value='RAIL', label= "RAIL")
+                    option(value='FERRY', label= "FERRY")
+                    option(value='BICYCLE', label= "BICYCLE")
+                    option(value='CAR', label= "CAR")
+                    option(value='CAR_PARK', label= "CAR_PARK")
+        .form-row
+            .form-group.col-xs-1
+                label(for='numItin') Itinerary
+                select#numItin.neu(type='select' name = "numItin" required='true' value='0' onmousedown="this.value='0'" onchange="formulateSelected(this.value);")
+                    option(value='0' selected, label="1")
+                    option(value='0', label="1")
+                    option(value='1', label="2")
+                    option(value='2', label="3")
+            .form-group.col-xs-3
+                input.primarybutton(type='submit' value='Formulate ' onclick='formulateRoute()') 
+            .form-group.col-sm-3
+                input.secondarybutton(type='submit' value='Clear' onclick='clearMap()')
+
+            .form-group.col-sm-3
+                button.primarybutton(onclick='displayTransitInstruction()') Show-Instruction
+           
+            if true
+                if search_result_count === 0
+                    .form-group.col-xs-1
+                        input.primarybutton(type='submit' value='Save-Itinerary' onclick='saveItinerary(selectedPathwayData(), location.href)')
+                else
+                    .form-group.col-xs-1
+                        input.primarybutton(type='submit' value='Update-Itinerary' onclick='saveItinerary(selectedPathwayData(), location.href)')
+            .form-group.col-sm-1
+                input.secondarybutton(type='submit' value='Cancel' onclick="location.href='/tripRequests/list';")
+            .form-group.col-sm-1
+    #map
+    script(src='/javascripts/leafletOTP.js')
+    p
+    
+    .container-fluid(id='transitInstruction')
+        
+    
+
+

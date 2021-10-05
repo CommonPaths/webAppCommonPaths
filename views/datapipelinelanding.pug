@@ -1,0 +1,54 @@
+extends layout
+
+block content
+
+
+    script.
+      const URLOSMBase = !{JSON.stringify(settingsRecord.osmEndpoint)};
+      const exportPrivateOSMUrl = URLOSMBase + "/export_ctrl/export_page/";
+  
+      function openExportPipeline() {
+        window.open(exportPrivateOSMUrl, "_blank", "toolbar=yes,scrollbars=yes,resizable=yes,top=200,left=500,width=900,height=800");
+      } 
+
+    .header
+      a.pagetitle
+        | Data Pipeline
+      .gradient
+        .username #{user.username} 
+          i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    br
+    br
+    br
+
+
+    .container-fluid.pipelinecontainer
+      .row
+        .card-deck
+          .card.settingcard
+            .card-block
+              .centericon
+                img.icon(src='../images/importicon.png' alt='import control panel icon' width="60" height="60")
+              h4.card-title Import Control Panel
+              button.primarybutton(type='button' onclick="location.href='/dataPipeline/import';") Import
+              
+          .card.settingcard
+            .card-block
+              .centericon
+                img.icon(src='../images/export.png' alt='export private osm icon' width="60" height="60")
+              h4.card-title Export Private OSM
+              button.primarybutton(type='button' onclick="openExportPipeline()") Export
+
+          .card.settingcard
+            .card-block
+              .centericon
+                img.icon(src='../images/otpgraphicon.png' alt='update otp graph icon' width="60" height="60")
+              h4.card-title Update OTP Graph
+              button.primarybutton(type='button' onClick="location.href='/dataPipeline/OTPtrigger';") Update
+ 
+    script(src='/javascripts/otpGraph.js')
+      
+    
+    
+              

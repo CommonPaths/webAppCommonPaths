@@ -1,0 +1,95 @@
+extends layout
+
+block content
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/settings') Settings
+                    i.fa.fa-caret-right(aria-hidden='true') 
+            li
+                a(href='/lookuptables/list') Lookup List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Delete
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    if lookuptableSearchResult && !(lookuptableSearchResultCount === 0)
+        P
+        .formcontainer
+            form(method='POST' action='')
+                .form-row
+                    .form-group.col-md-4
+                        label(for='id') ID: 
+                        input#id.form-control(type='text' placeholder='enter first name' name='id' readonly required='true' value=lookuptableSearchResult[0].dataValues.id)
+                    .form-group.col-md-4.margin
+                        label(for='conditions') Eligibility Condition Code: 
+                        input#conditions.form-control(type='text'  name='conditions' readonly required='true' value=lookuptableSearchResult[0].dataValues.conditions)
+                    .form-group.col-md-4.margin
+                        label(for='conditionsDesc') Eligibility Condition Code Desc: 
+                        input#conditionsDesc.form-control(type='text'  name='conditionsDesc' readonly required='true' value=lookuptableSearchResult[0].dataValues.conditionsDesc)
+                    .form-group.col-md-4
+                        label(for='mobAids') Mobilitiy Aid Code: 
+                        input#mobAids.form-control(type='text' name='mobAids' readonly required='true' value=lookuptableSearchResult[0].dataValues.mobAids)
+                    .form-group.col-md-4.margin
+                        label(for='mobAidsDesc') Mobilitiy Aid Code: Desc. 
+                        input#conditions.form-control(type='text'  name='mobAidsDesc' readonly required='true' value=lookuptableSearchResult[0].dataValues.mobAidsDesc)
+                    .form-group.col-md-4.margin
+                        label(for='prefSpaceType') Pref Space Type Code: 
+                        input#prefSpaceType.form-control(type='text'  name='prefSpaceType' readonly required='true' value=lookuptableSearchResult[0].dataValues.prefSpaceType)                        
+                    .form-group.col-md-4
+                        label(for='prefSpaceTypeDesc') Pref Space Type Code Desc: 
+                        input#prefSpaceTypeDesc.form-control(type='text'  name='prefSpaceTypeDesc' readonly required='true' value=lookuptableSearchResult[0].dataValues.prefSpaceTypeDesc)
+
+                .form-row
+                    .form-group.col-md-2
+                        if lookuptableSearchResult[0].deletedAt === null
+                            input.primarybutton(type='submit' value='Delete' onclick="return confirm('Are you sure you want to Delete?')")
+                            .form-row
+                                .form-group.col-md-12       
+                                .form-group.col-md-12
+                                    input(type='checkbox' name='permanentDelete' value='true')
+                                    label(for='permanentDelete') &nbsp;Permanently
+                        else
+                            input.primarybutton(type='submit' value='Restore')
+                    .form-group.col-md-2
+                        input.secondarybutton(type='button' value='Cancel' onclick="location.href='/lookuptables/list';")
+                
+    if  lookupSearchResultCount === 0
+        p No Records Found
+
+    if s_status == 'Record Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/lookuptables/list';") Go to List
+
+    if s_status == 'Record Permanently Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/lookuptables/list';") Go to List
+
+    if s_status == 'Record Restored'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/lookuptables/list';") Go to List
+
+
+    if s_status == 'Error Processing Record'
+        .notifydiv
+            h1=s_status
+            img.notifywarningicon(src='/images/warningnotify.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/lookuptables/list';") Go to List
+
+
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg

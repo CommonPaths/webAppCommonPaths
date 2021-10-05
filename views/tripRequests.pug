@@ -1,0 +1,521 @@
+extends layout
+    
+block content
+
+    input(type="hidden", id="tripRequestsJsonId", value=tripRequests )
+    input(type="hidden", id="addressPost", value=address )
+
+    script.
+        $(document).ready(function() {
+            const address = $('#addressPost').val()
+            if(address.length > 0) {
+                $('#table').bootstrapTable('showColumn', "pDistance")
+            } else {
+                $('#table').bootstrapTable('hideColumn', "pDistance")
+            }
+        })
+        
+        const tripRequestsJsonJs = document.getElementById("tripRequestsJsonId").value;
+        const tripRequestsRecord = JSON.parse(tripRequestsJsonJs);
+        
+        let resultEncode = [];
+
+        async function geocodeAddress(address, id) {
+            map.spin(true);
+            const geocoderURL = document.getElementById('geocoderEndpoint').value;
+            const apiData = {
+                format: 'json',
+                addressdetails: 1,
+                q: address,
+                limit: 1,
+            };
+
+            return [id, await new Promise((resolve, reject) => {
+                $.ajax({
+                url: geocoderURL,
+                type: 'GET',
+                dataType: 'json',
+                data: apiData,
+                success: (pointCoor) => {resolve(pointCoor); map.spin(false);},
+                error: (err) => {reject(err);  map.spin(false);},
+                });
+            })];
+        }
+
+
+        function sleep(seconds){
+            const waitUntil = new Date().getTime() + seconds*1000;
+            while(new Date().getTime() < waitUntil) true;
+        }
+
+        function mapTripHistory() {
+            let $table = $('#table');
+            let viewData = $table.bootstrapTable('getData', {'useCurrentPage':'true'});
+            let pAddress;
+            let dAddress;
+            let clusterMarkers = L.markerClusterGroup({
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: true,
+                zoomToBoundsOnClick: true
+            });
+            const circleColorOption = {
+                color: '#000000',
+                fillOpacity: 0.5,
+                fillColor: '#ffff00',
+                radius: 14
+            };
+            
+            clearMap();
+
+            for (var i=0; i < viewData.length; i++) {
+                pAddress = `${viewData[i].pAddr}, ${viewData[i].pCity}, ${viewData[i].pZip}`;
+                dAddress = `${viewData[i].dAddr}, ${viewData[i].dCity}, ${viewData[i].dZip}`;
+
+                if (viewData[i].pLat && viewData[i].pLon && viewData[i].dLat && viewData[i].dLon) {
+                    clusterMarkers.addLayer(L.circleMarker([viewData[i].pLat, viewData[i].pLon], circleColorOption).bindTooltip(`FROM, T.ID: ${viewData[i].id}`)).addTo(map);
+                    clusterMarkers.addLayer(L.circleMarker([viewData[i].dLat, viewData[i].dLon], circleColorOption).bindTooltip(`TO, T.ID: ${viewData[i].id}`)).addTo(map);
+                } else {
+                    geocodeAddress(pAddress, viewData[i].id).then(geocodeResult => {
+                        if (geocodeResult[1].length != 0) {
+                            clusterMarkers.addLayer(L.circleMarker([geocodeResult[1][0].lat, geocodeResult[1][0].lon], circleColorOption).bindTooltip(`FROM, T.ID: ${geocodeResult[0]}`)).addTo(map);
+                        }
+                        resultEncode.push(geocodeResult);
+                    }).catch(function(err) {
+                        alert('geocoding error: ' + err.toString() + ', T.ID: ' + row.id);
+                    });
+                    sleep(0.5);
+
+                    geocodeAddress(dAddress, viewData[i].id).then(geocodeResult => {
+                        if (geocodeResult[1].length != 0) {
+                            clusterMarkers.addLayer(L.circleMarker([geocodeResult[1][0].lat, geocodeResult[1][0].lon], circleColorOption).bindTooltip(`TO, T.ID: ${geocodeResult[0]}`)).addTo(map);
+                        }
+                        resultEncode.push(geocodeResult);
+                    }).catch(function(err) {
+                        alert('geocoding error: ' + err.toString() + ', T.ID: ' + row.id);
+                    });
+                    sleep(0.5);
+                }
+            }
+            
+        }
+
+      
+        function clearMapItems() {
+            clearMap();
+        }
+
+        function rowClick(row, $element, field) {
+            let latLng;
+            pAddress = `${row.pAddr}, ${row.pCity}, ${row.pZip}`;
+            dAddress = `${row.dAddr}, ${row.dCity}, ${row.dZip}`;
+            
+            geocodeAddress(pAddress, row.id).then(geocodeResult => {
+                tooltipMessage = `FROM, T.ID: ${row.id}`;
+                if (geocodeResult[1].length != 0) {
+                    latLng = [geocodeResult[1][0].lat, geocodeResult[1][0].lon];
+                    L.marker(latLng).bindTooltip(tooltipMessage).addTo(map);
+                }
+                else {
+                    alert('T.ID: ' + row.id + ', Error geocoding Origin/From address');
+                }
+            }).catch(function(err) {
+                alert('geocoding error: ' + err.toString()); // ToDo: hsidelil, convert this to logger
+            });
+            geocodeAddress(dAddress, row.id).then(geocodeResult => {
+                tooltipMessage = `TO, T.ID: ${row.id}`;
+                if (geocodeResult[1].length != 0) {
+                    latLng = [geocodeResult[1][0].lat, geocodeResult[1][0].lon];
+                    L.marker(latLng).bindTooltip(tooltipMessage).addTo(map);
+                }
+                else {
+                    alert('T.ID: ' + row.id + ', Error geocoding Destination/To address');
+                }
+            }).catch(function(err) {
+                alert('geocoding error: ' + err.toString() + ', T.ID: ' + row.id); // ToDo: hsidelil, convert this to logger
+            })
+        }
+
+        function cloneTrip(index){
+            const row = !{JSON.stringify(tripRequests)};
+            const getConfirmation = confirm(`Are you sure you want to clone`)
+
+            if(getConfirmation == true){
+                $.ajax({
+                url: 'clone',
+                type: 'POST',
+                dataType: 'json',
+                data: row[index],
+                success: (data) => {
+                    if(data.clone_status == 'Record cloned') {
+                         $('#clone-alert').attr({hidden: false})
+                    } else if(data.clone_status == 'Record not cloned Error'){
+                         $('#clone-error').attr({hidden: false})
+                        }
+                    }
+                })
+            }
+        }
+
+        async function geoCode(index) {
+            const row = !{JSON.stringify(tripRequests)};
+            const getConfirmation = confirm(`Are you sure you want to GeoCode?`)
+            const apiEndPoint = $('#geocoderEndpoint').val();
+            let currentData = row[index];
+            const originAddress = `${currentData.pAddr}, ${currentData.pCity}, ${currentData.pZip}`;
+            const destinationAddress = `${currentData.dAddr}, ${currentData.dCity}, ${currentData.dZip}`;
+
+            const originApiData = {
+                    format: 'json',
+                    addressdetails: 1,
+                    q: originAddress,
+                    limit: 1,
+                };
+
+            const destinationApiData = {
+                    format: 'json',
+                    addressdetails: 1,
+                    q: destinationAddress,
+                    limit: 1,
+                };
+
+            const originGeoCodeData = await $.ajax({
+                    url: apiEndPoint,
+                    type: 'GET',
+                    dataType: 'json',
+                    data: originApiData,
+                });
+
+            sleep(1);
+
+            const destinationGeoCodeData = await $.ajax({
+                    url: apiEndPoint,
+                    type: 'GET',
+                    dataType: 'json',
+                    data: destinationApiData,
+                });
+
+            currentData.pLat = originGeoCodeData[0].lat;
+            currentData.pLon = originGeoCodeData[0].lon;
+            currentData.dLat = destinationGeoCodeData[0].lat;
+            currentData.dLon = destinationGeoCodeData[0].lon;
+            currentData.clientsId = currentData.ClientProfileModel.clientId;
+            
+            if(getConfirmation == true) {
+               $.ajax({
+                    url: 'geocode',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: currentData,
+                    success: (data) => {
+                        if(data.update_status == 'Record Updated') {
+                            $('#update-alert').attr({hidden: false})
+                        } else if(data.update_status == 'Error updating record'){
+                            $('#update-error').attr({hidden: false})
+                        }
+                    }
+                })
+            }
+        }
+
+        async function geoCodeAddressData() {
+            const address = $('#proximityAddress').val();
+            const apiEndPoint = $('#geocoderEndpoint').val();
+            
+            const apiData = {
+                    format: 'json',
+                    addressdetails: 1,
+                    q: address,
+                    limit: 1,
+                };
+
+            const originGeoCodeData = await $.ajax({
+                    url: apiEndPoint,
+                    type: 'GET',
+                    dataType: 'json',
+                    data: apiData,
+                });
+
+            
+            document.getElementById('addressLat').value = originGeoCodeData[0].lat;
+            document.getElementById('addressLon').value = originGeoCodeData[0].lon;
+        }
+
+        function filterSearch(event) {
+            geoCodeAddressData().then(function() {
+                document.getElementById("filterForm").submit();
+            })
+        }
+
+        function detailFormatter(index, row, $detail) {
+            const tripHistoryRecord = !{JSON.stringify(tripRequests)};
+            const tripRequesetRecordSelected = tripRequestsRecord.find(element => element.id == parseInt(row.id));
+            if (tripRequesetRecordSelected.ADAPathwayModel === null) {
+                $detail.ready(function() {
+                    const notes = "<p> Notes: " + row.notes + "</p>";
+                    const editTripRequestURL = "<a class='secondarybutton secondaryLinkButton' href=" + "'update" + "?id=" + row.id + "'" +  "</a> Edit-Trip-History"; 
+                    const formulatePathway = "<a class='secondarybutton secondaryLinkButton' href=" + "'../pathwayItinerary/formulate?tripRequestId=" + row.id + "'" +  "</a> Formulate-Pathway";
+                    const cloneTripRequest = `<a class='secondarybutton secondaryLinkButton' style='cursor:pointer' onClick='cloneTrip(${index})' </a> Clone-Trip-Record`;
+                    const fullAddrOrg = row.pAddr + ', ' + row.pCity + ', ' + row.pZip;
+                    const fullAddrDest = row.dAddr + ', ' + row.dCity + ', ' + row.dZip;
+                    const copyorgAddress = `<a class='secondarybutton secondaryLinkButton' style='cursor:pointer' onClick="copyTextValue('${fullAddrOrg}')" </a> Copy-Org-Addr`;
+                    const copydestAddress = `<a class='secondarybutton secondaryLinkButton' style='cursor:pointer' onClick="copyTextValue('${fullAddrDest}')" </a> Copy-Dest-Addr`;
+                    const geoCode = `<a class='secondarybutton secondaryLinkButton' style='cursor:pointer' onClick='geoCode(${index})' </a> GeoCode-Trip-Record`;
+                    $detail.append(notes, editTripRequestURL, formulatePathway, cloneTripRequest, geoCode, copyorgAddress, copydestAddress);
+                });
+            } else {
+                $detail.ready(function() {
+                    const notes = "<p> Notes: " + row.notes + "</p>";
+                    const editTripRequestURL = "<a class='secondarybutton secondaryLinkButton' href=" + "'update" + "?id=" + row.id + "'" +  "</a> Edit-Trip-History"; 
+                    const formulatePathway = "<a class='secondarybutton secondaryLinkButton' href=" + "'../pathwayItinerary/formulate?tripRequestId=" + row.id + "'" +  "</a> Formulate-Pathway";
+                    const addDesktopReviewURL = "<a class='secondarybutton secondaryLinkButton' href=" + "'../desktopReviews/create" + "?tripRequestsId=" + row.id + "'" +  "</a> Add-Desktop-Review";
+                    const cloneTripRequest = `<a class='secondarybutton secondaryLinkButton' style='cursor:pointer' onClick='cloneTrip(${index})' </a> Clone-Trip-Record`;
+                    const fullAddrOrg = row.pAddr + ', ' + row.pCity + ', ' + row.pZip;
+                    const fullAddrDest = row.dAddr + ', ' + row.dCity + ', ' + row.dZip;
+                    const copyorgAddress = `<a class='secondarybutton secondaryLinkButton' style='cursor:pointer' onClick="copyTextValue('${fullAddrOrg}')" </a> Copy-Org-Addr`;
+                    const copydestAddress = `<a class='secondarybutton secondaryLinkButton' style='cursor:pointer' onClick="copyTextValue('${fullAddrDest}')" </a> Copy-Dest-Addr`;
+                    const geoCode = `<a class='secondarybutton secondaryLinkButton' style='cursor:pointer' onClick='geoCode(${index})' </a> GeoCode-Trip-Record`;
+                    $detail.append(notes, editTripRequestURL, formulatePathway, addDesktopReviewURL, cloneTripRequest, geoCode, copyorgAddress, copydestAddress);
+                });
+            }
+        }
+        
+
+        window.icons = {
+            refresh: 'ion-md-refresh',
+            columns: 'ion-md-menu',
+            fullscreen: 'ion-md-expand',
+            export: 'ion-md-download',
+            detailOpen: 'ion-md-arrow-down',
+            detailClose: 'ion-md-arrow-up',
+            toggleOff: 'ion-md-arrow-down',
+            toggleOn: 'ion-md-arrow-up'   
+        }
+
+    .header
+        a.pagetitle
+          | Trip History
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+    
+    input(type='hidden' id='otpEndpoint' value=settingsRecord.otpEndpoint)
+    input(type='hidden', id='osmEndpoint' value=settingsRecord.osmEndpoint)
+    input(type='hidden', id='geocoderEndpoint' value=settingsRecord.geocoderEndpoint)
+    input(type='hidden', id='bingMapKey' value=settingsRecord.bingMapKey)
+    input(type='hidden', id='historicPicMetaDataLayersSeattle' value=historicPicMetaDataLayersSeattle)
+    input(type='hidden', id='customlayerID' value=settingsRecord.userSettings)
+    input(type='hidden', id='settingsRecordBbox' value=settingsRecord.bbox)
+    input(type='hidden', id='fieldReviewRecords' value=fieldReviewSearchResult)
+
+    input(type='hidden', id='cognitoRegion' value=settingsRecord.cognitoRegion)
+    input(type='hidden', id='s3AccessKeyId' value=settingsRecord.s3AccessKeyId)
+    input(type='hidden', id='s3SecretAccessKey' value=settingsRecord.s3SecretAccessKey)
+    input(type='hidden', id='s3BucketName' value=settingsRecord.s3BucketName)
+
+    input(type='hidden', id='transportThunderforestKey' value=settingsRecord.transportTileLayerKey)
+    input(type='hidden', id='customTileLayerName' value=settingsRecord.customTileLayerName)
+    input(type='hidden', id='mapboxAccountName' value=settingsRecord.mapboxAccountName)
+    input(type='hidden', id='mapboxAccountStyleID' value=settingsRecord.mapboxAccountStyleID)
+    input(type='hidden', id='mapboxAccountKey' value=settingsRecord.mapboxAccountKey)
+
+    input(type='hidden' id='ADAPathwayRecords', value=ADAPathwayRecords)
+
+    #toolbar.tableheaderTripsFilter
+        form#filterForm(method='POST' action='' onsubmit='filterSearch(event)')
+            .filterdiv
+                .form-group
+                    label(for='trips') Trips#:
+                    input#trips.form-control.filterinput(type='number' placeholder='Trips # Min default=3' name='trips' required='true' min=0 value=tripsValue)
+
+                .form-group
+                    label(for='days') Days#:
+                    input#days.form-control.filterinput(type='number' placeholder='Days # Min default=90' name='days' required='true' min=0 value=daysValue)
+
+                .form-group
+                    label(for='proximityAddress') Address:
+                    input#proximityAddress.form-control.filterinputlong(type ='text' placeholder='Enter address' name='proximityAddress' value=address)
+                
+                .form-group
+                    label(for='proximitySearch') Search Options:  
+                    select#proximitySearch.form-control.filterinput(class="selectpicker" name = "proximitySearch" value='' multiple)
+                        option(value='Origin') Origin
+                        option(value='Destination') Dest.
+                        option(value="All records") All records
+                
+                .form-group
+                    label(for='proximityDistance' style='margin-left:1em;') Dist.(mi):
+                    input#proximityDistance.form-control.filterinput(type='text' name='proximityDistance' value=distance style='margin-left:1em;')
+
+                    input#addressLat(type='hidden' name='addressLat' value='')
+                    input#addressLon(type='hidden' name='addressLon' value='')
+
+                .form-group
+                    input.primarybuttonTripsFilter(type='submit' value='Filter')
+        
+    table.table-sm.w-auto.table-borderless.table-striped(
+        id="table" 
+        data-toggle="table" 
+        data-show-toggle="true" 
+        data-toolbar="#toolbar" 
+        data-search="true" 
+        data-show-refresh="false" 
+        data-show-fullscreen="true" 
+        data-show-columns="true" 
+        data-show-columns-toggle-all="true" 
+        data-detail-view="true" 
+        data-show-export="true" 
+        data-detail-formatter="detailFormatter" 
+        data-minimum-count-columns="2" 
+        data-pagination="true" 
+        data-page-list="[10, 25, 50, 100, all]" 
+        data-show-footer="true" 
+        data-icons-prefix="icon"
+        data-icons="icons"
+        data-show-detail-view="true"
+        data-page-size="5"
+        )
+        thead.bg-color
+            tr
+                if getLoggedUserRole === 'admin'
+                    th
+                        button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button')
+                th(data-sortable="true" data-field="id") T.ID
+                th(data-sortable="true" data-field="bookingId" data-visible="false") Bkg.ID
+                th(data-sortable="true" data-field="clientId") ClientID
+                th(data-sortable="true" data-field="clientName" data-visible="false") C.Name
+                th(data-sortable="true" data-field="trips") Trips#
+                th(data-sortable="true" data-field="pName") OrgNameUnit
+                th(data-sortable="true" data-field="pAddr") OrgAddr
+                th(data-sortable="true" data-field="pCity") OrgCity
+                th(data-sortable="true" data-field="pZip") OrgZip
+                th(data-sortable="true" data-field="pDistance") Dist.(mi)
+                th(data-sortable="true" data-field="pLat" data-visible="false") pLat
+                th(data-sortable="true" data-field="pLon" data-visible="false") pLon
+                th(data-sortable="true" data-field="dName") DestNameUnit 
+                th(data-sortable="true" data-field="dAddr") DestAddr
+                th(data-sortable="true" data-field="dCity") DestCity 
+                th(data-sortable="true" data-field="dZip") DestZip   
+                th(data-sortable="true" data-field="dLat" data-visible="false") dLat
+                th(data-sortable="true" data-field="dLon" data-visible="false") dLon
+                th(data-sortable="true" data-field="DateAdded") DateAdded 
+                th(data-sortable="true" data-field="daysOfWeekRequested" data-visible="false") DaysWeek 
+                th(data-sortable="true" data-field="tripTime") TripTime
+                th(data-sortable="true" data-field="appointmentTime") AppTime
+                th(data-sortable="true" data-field="tripRequestType") TripType
+                th(data-sortable="true" data-field="priority") Priority
+                th(data-sortable="true" data-field="status") Status
+                th(data-sortable="true" data-field="dateCompleted") Completed
+                th(data-sortable="true" data-field="officersId") Officer
+                th(data-sortable="true" data-field="notes" data-visible="false") Notes
+                if getLoggedUserRole === 'admin'
+                    th(data-sortable="true" data-field="deletedAt") deletedAt
+                    th(data-sortable="true" data-field="updatedAt") updatedAt 
+        tbody
+            each item in tripRequests 
+                tr      
+                    if getLoggedUserRole === 'admin'
+                        td 
+                            a(href='/tripRequests/' + item.id + '/delete' title='Delete/Restore')
+                                i.fas.fa-trash.customedit     
+                    td(align='center') #{item.id} 
+                    td(align='center') #{item.bookingId}
+                    td(align='center') #{item.ClientProfileModel.clientId}
+                    th(align='center') #{item.ClientProfileModel.clientName}
+                    td(align='center') #{item.trips}
+                    td(align='center') #{item.pName + ' , ' + item.pUnit}
+                    td(align='center') #{item.pAddr}                    
+                    td(align='center') #{item.pCity}
+                    td(align='center') #{item.pZip}
+                    td(align='center') #{item.totalDistance == undefined ? '' : item.totalDistance.toFixed(2)}
+                    td(align='center') #{item.pLat}
+                    td(align='center') #{item.pLon}
+                    td(align='center') #{item.dName+ ' , ' + item.dUnit}
+                    td(align='center') #{item.dAddr}
+                    td(align='center') #{item.dCity}
+                    td(align='center') #{item.dZip}
+                    td(align='center') #{item.dLat}
+                    td(align='center') #{item.dLon}
+                    td(align='center') #{item.DateAdded}
+                    td(align='center') #{item.daysOfWeekRequested.toString()}
+                    td(align='center') #{item.tripTime}
+                    td(align='center') #{item.appointmentTime}
+                    td(align='center') #{item.tripRequestType}
+                    td(align='center') #{item.priority}
+                    td(align='center') #{item.status}
+                    td(align='center') #{item.dateCompleted}
+                    td(align='center') #{item.OfficerModel.lastName + ", " + item.OfficerModel.firstName}
+                    td(align='center') #{item.notes}
+                    if getLoggedUserRole === 'admin'
+                        td(align='center') #{item.deletedAt}
+                        td(align='center') #{item.updatedAt}
+        tfoot
+            tr
+                th(colspan='12')
+        
+    
+    #clone-alert.alert.alert-success.alert-dismissable.fade.show(role='alert' hidden="true")
+        .popupalerts
+            .notificationicon
+                iconify-icon(data-icon='teenyicons:tick-circle-outline')                
+            h2.alert-heading Success! 
+            p                    
+            .alert-body
+                | Trip History Cloned Successfully! 
+            p                 
+            .alert-footer
+                button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip History
+    
+    
+    #update-alert.alert.alert-success.alert-dismissable.fade.show(role='alert' hidden="true")
+        .popupalerts
+            .notificationicon
+                iconify-icon(data-icon='teenyicons:tick-circle-outline')                
+            h2.alert-heading Success! 
+            p                    
+            .alert-body
+                | Trip History Geocoded Successfully! 
+            p                 
+            .alert-footer
+                button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip History
+    
+    #clone-error.alert.alert-danger.alert-dismissable.fade.show(role='alert' hidden='true')
+        .popupalerts
+            .warningicon
+                i.fa.fa-exclamation-circle(aria-hidden='true')
+            h2.alert-heading Error!
+            p
+            .alert-body
+                | Failed to add trip History!
+            p
+            .alert-footer
+                button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip History
+    
+    #update-error.alert.alert-danger.alert-dismissable.fade.show(role='alert' hidden='true')
+        .popupalerts
+            .warningicon
+                i.fa.fa-exclamation-circle(aria-hidden='true')
+            h2.alert-heading Error!
+            p
+            .alert-body
+                | Failed to add trip History!
+            p
+            .alert-footer
+                button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip History
+
+    
+    script.
+        let $table = $('#table');
+        $table.bootstrapTable({
+            onSearch: clearMapItems,
+            onPageChange: clearMapItems,
+            onClickRow: rowClick,
+        })
+        function copyTextValue(addr) {
+            document.getElementById("proximityAddress").value = addr;
+        }
+
+    button.primarybutton(type='button' onclick='mapTripHistory()') Load-Map
+    button.secondarybutton(type='button' onclick='clearMapItems()') Clear 
+
+    #map
+    script(src='/javascripts/leafletOTP.js')

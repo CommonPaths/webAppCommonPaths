@@ -1,0 +1,83 @@
+body {background-color: #22274F;font-family: 'Roboto', sans-serif; ;font-size: 14px;overflow: hidden; height: 100%;}
+.container{padding: 0px !important;}
+.login-div {background: #ffffff;height: 100%;} 
+.link {text-align: left;}
+.link a { font-size: 15px;}
+.animation{ margin-top: 2%;}
+.welcomesvg{
+  margin-left: 10%;
+  font-size: 38px;
+  width: 100%;
+  color: white;
+}
+.welcometitle{ margin-bottom: 5%;} 
+.logo{text-align: center;}
+.form{align-content: center;}
+.img{padding: 1em; width: 50%;}
+.lines{width: 500px;}
+.fullheight {height: 100%;}
+.field-label{
+  color: #747167;
+  font-size: 1.2em;
+  font-weight: 200;
+  letter-spacing: 1px;
+}
+.form-group{
+  padding-bottom: 1em;
+}
+.title-label{
+  color: #000000;
+  font-weight: regular;
+  font-size: 24px; 
+  padding: 2em 0em 2em 0em;
+}
+.btn-info{
+  background-color: #D2743D;
+  border: none;
+}
+.btn-info:hover{
+  background-color: #22274F;
+  border: none;
+}
+.btn-info:active{
+  background-color: #22274F;
+  border: none;
+}
+.showPassword{
+  font-size: 16px;
+  padding: 20px;
+}
+@media(max-width:1200px) {
+  #hide{display:none;}
+  .login-div{width: 100vw;}
+  .img{width: 25%;}
+  .title-label{ padding: 1em 0em 1em 0em;}
+  body{ font-size: 12px;}
+}
+.checkbox-lg .custom-control-label::before, 
+.checkbox-lg .custom-control-label::after {
+  top: .8rem;
+  width: 1.55rem;
+  height: 1.55rem;
+}
+
+.checkbox-lg .custom-control-label {
+  padding-top: 13px;
+  padding-left: 6px;
+}
+
+
+.checkbox-xl .custom-control-label::before, 
+.checkbox-xl .custom-control-label::after {
+  top: 1.2rem;
+  width: 1.85rem;
+  height: 1.85rem;
+}
+
+.checkbox-xl .custom-control-label {
+  padding-top: 23px;
+  padding-left: 10px;
+}
+.showpassword{
+  font-size: 1.4em;
+}

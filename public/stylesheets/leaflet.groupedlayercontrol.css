@@ -1,0 +1,18 @@
+.leaflet-control-layers-group-name {
+  font-weight: bold;
+  font-size: larger;
+  border-bottom: 2px solid black;
+  color: black;
+  margin-bottom: .5em;
+  margin-left: 3px;
+}
+
+.leaflet-control-layers-group {
+  background-color: rgba(241, 241, 241, 0.719);
+  margin-bottom: .5em;
+}
+
+.leaflet-control-layers-scrollbar {
+  overflow-y: scroll;
+  padding-right: 10px;
+}

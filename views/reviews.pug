@@ -1,0 +1,258 @@
+extends layout
+    
+block content
+
+    script.
+        const regionAWS = !{JSON.stringify(s3Region)};
+        const accessKeyIdAWS = !{JSON.stringify(s3AccessKeyId)};
+        const secretAccessKeyAWS = !{JSON.stringify(s3SecretAccessKey)};
+        const bucketName = !{JSON.stringify(s3BucketName)};
+        const signedUrlExpSecs = 60 * 4 ; // in-seconds 
+
+        function initAWS(regionAWSAcc, accessKeyIdAWSAcc, secretAccessKeyAWSAcc) {
+            AWS.config.region = regionAWSAcc;
+            AWS.config.update({
+                    accessKeyId: accessKeyIdAWSAcc,
+                    secretAccessKey: secretAccessKeyAWSAcc
+            });
+            return new AWS.S3();
+        }
+        function getPicURL(s3APIObj, bucketNameS3, fileNameS3, expTime) {
+            return s3APIObj.getSignedUrl('getObject', {
+                Bucket: bucketNameS3,
+                Key: fileNameS3,
+                Expires: expTime
+            });
+        }
+
+        function showPic(picMeta) {
+            
+            let picItems = [];
+            let picItemElem = {};
+
+            const optionsPhoto = {
+                    index: 0,
+                    multiInstances: false
+            };
+
+            let s3 = initAWS(regionAWS, accessKeyIdAWS, secretAccessKeyAWS);
+
+            for (let i = 0; i < picMeta.length; i++) {
+                picItemElem['src'] = getPicURL(s3, bucketName, picMeta[i].fileName, signedUrlExpSecs);
+                picItemElem['title'] = (i+1) + '/' + picMeta.length + ', ID:' + picMeta[i].fieldReviewID + ', ' + picMeta[i].pictureDate;
+                picItems.push(picItemElem);
+                picItemElem = {};
+            } 
+            var viewer = new PhotoViewer(picItems, optionsPhoto); // Picture viewer: https://www.npmjs.com/package/jquery.magnify
+    
+        }
+
+    script.
+        function detailFormatterDesktopReview(index, row, $detail) { 
+            $detail.ready(function(){
+                const  notes = "<p> Notes: " + row.notes + "</p>";
+                const editReviewURL = "<a class='secondarybutton secondaryLinkButton' href=" + "'../desktopReviews/update" + "?desktopReviewId=" + row.id + "'" +  "</a> Edit-Review   "; 
+                $detail.append(notes, editReviewURL);
+                });
+            }
+        function detailFormatterFieldReview(index, row, $detail) { 
+            $detail.ready(function(){
+                const  notes = "<p> Notes: " + row.notes + "</p>";
+                const editReviewURL = "<a class='secondarybutton secondaryLinkButton' href=" + "'../fieldReviews/update" + "?fieldReviewId=" + row.id + "'" +  "</a> Edit-Review   "; 
+                $detail.append(notes, editReviewURL);
+                });
+            }
+
+        window.icons = {
+            columns: 'ion-md-menu',
+            fullscreen: 'ion-md-expand',
+            export: 'ion-md-download',
+            detailOpen: 'ion-md-arrow-down',
+            detailClose: 'ion-md-arrow-up',
+            toggleOff: 'ion-md-arrow-down',
+            toggleOn: 'ion-md-arrow-up'     
+        }
+        
+    .header
+        a.pagetitle
+          | Reviews Dashboard
+        .gradient
+            .username #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    hr
+    form(method='POST' action='')
+        .form-inline            
+            label(for='dateStart' class="col-form-label") &nbsp; &nbsp; Date-Start: 
+            input#dateFrom.form-control.form-control-md(type='date' placeholder='Start Date Default=90Days from today' name='dateStart' required='true' value=dateStart)
+            
+            label(for='dateEnd' class="col-form-label") &nbsp; Date-End: 
+            input#dateEnd.form-control.form-control-md(type='date' placeholder='Pick Date To Default=today' name='dateEnd' required='true' value=dateEnd)
+
+            p  &nbsp; &nbsp;
+            input.primarybuttonTripsFilter(type='submit' value='Filter' ) 
+            i &nbsp; &nbsp; Default Filter, 90 days from today's date
+    hr
+    .tablecontainer.table-md
+
+        #toolbar.tableheader
+            strong Desktop Review                                                             
+        table.table.btn-table.table-responsive.w-auto.table-striped.table-borderless(
+            id="table1"
+            data-toggle="table"
+            data-show-toggle="true"
+            data-toolbar="#toolbar" 
+            data-search="true" 
+            data-show-refresh="false" 
+            data-show-fullscreen="true" 
+            data-show-columns="true" 
+            data-show-columns-toggle-all="true" 
+            data-detail-view="true" 
+            data-show-export="true" 
+            data-detail-formatter="detailFormatterDesktopReview" 
+            data-minimum-count-columns="2"  
+            data-pagination="true" 
+            data-page-list="[10, 25, 50, 100, all]" 
+            data-show-footer="true"
+            data-icons-prefix="icon"
+            data-icons="icons"
+            data-show-detail-view="true"
+            data-page-size="5"
+            )
+            thead.bg-color
+                tr
+                    th
+                        button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button')
+                    if getLoggedUserRole === 'admin'
+                        th
+                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button')
+                    th(data-sortable="true" data-field="id") D.ID
+                    th(data-sortable="true" data-field="tripRequestsId") TripH.ID 
+                    th(data-sortable="true" data-field="bookingId" data-visible="false") Bkg.ID 
+                    th(data-sortable="true" data-field="clientId") ClientID 
+                    th(data-sortable="true" data-field="clientName" data-visible="false") C.Name
+                    th(data-sortable="true" data-field="trips") Trips# 
+                    th(data-sortable="true" data-field="reviewLocation") Location
+                    th(data-sortable="true" data-field="officer") Officer 
+                    th(data-sortable="true" data-field="reviewStartDate") Started 
+                    th(data-sortable="true" data-field="reviewCompleteDate") Completed 
+
+                    th(data-sortable="true" data-field="status") Status 
+                    th(data-sortable="true" data-field="priority") Priority 
+                    th(data-sortable="true" data-field="notes" data-visible="false") Notes
+                    if getLoggedUserRole === 'admin'
+                        th(data-sortable="true" data-field="deletedAt") deletedAt
+                        th(data-sortable="true" data-field="updatedAt") updatedAt 
+
+                    
+            tbody
+                each item in desktopReviewsData
+                    tr   
+                        td
+                            a(href='/desktopReviews/update?desktopReviewId='+item.id data-toggle='tooltip' title='Edit Profile')
+                                i.fas.fa-pen.customedit
+                        if getLoggedUserRole === 'admin'
+                            td 
+                                a(href='/desktopReviews/' + item.id + '/delete' data-toggle='tooltip' title='Delete/Restore')
+                                    i.fas.fa-trash.customedit
+                        td(align='center') #{item.id}
+                        td(align='center') #{item.tripRequestsId}
+                        td(align='center') #{item.TripRequestModel.bookingId}
+                        td(align='center') #{item.TripRequestModel.ClientProfileModel.clientId}
+                        td(align='center') #{item.TripRequestModel.ClientProfileModel.clientName}
+                        td(align='center') #{item.TripRequestModel.trips}
+                        td(align='center') #{item.reviewLocation}
+                        td(align='center') #{item.OfficerModel.lastName +', ' + item.OfficerModel.firstName}
+                        td(align='center') #{item.reviewStartDate}
+                        td(align='center') #{item.reviewCompleteDate}
+                        td(align='center') #{item.status}
+                        td(align='center') #{item.priority}
+                        td(align='center') #{item.notes}
+                        if getLoggedUserRole === 'admin'
+                            td(align='center') #{item.deletedAt}
+                            td(align='center') #{item.updatedAt}
+        hr
+        #toolbar2.tableheader
+            strong Field Review &nbsp; &nbsp; &nbsp;   
+        table.table.btn-table.table-responsive.w-auto.table-striped.table-borderless(
+            id="table2"
+            data-toggle="table"
+            data-show-toggle="true"
+            data-toolbar="#toolbar2" 
+            data-search="true" 
+            data-show-refresh="false" 
+            data-show-fullscreen="true" 
+            data-show-columns="true" 
+            data-show-columns-toggle-all="true" 
+            data-detail-view="true" 
+            data-show-export="true" 
+            data-detail-formatter="detailFormatterFieldReview" 
+            data-minimum-count-columns="2" 
+            data-pagination="true" 
+            data-page-list="[10, 25, 50, 100, all]" 
+            data-show-footer="true"
+            data-icons-prefix="icon"
+            data-icons="icons"
+            data-show-detail-view="true"
+            data-page-size="5" 
+            )
+            thead.bg-color
+                tr 
+                    th
+                        button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button')
+                    if getLoggedUserRole === 'admin'
+                        th
+                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button')
+                    th(data-sortable="true" data-field="id") F.ID
+                    th(data-sortable="true" data-field="tripRequestsId") TripH.ID 
+                    th(data-sortable="true" data-field="bookingId" data-visible="false") Bkg.ID 
+                    th(data-sortable="true" data-field="clientId") ClientID 
+                    th(data-sortable="true" data-field="clientName" data-visible="false") C.Name
+                    th(data-sortable="true" data-field="trips") Trips# 
+                    th(data-sortable="true" data-field="reviewLocation") Location
+                    th(data-sortable="true" data-field="mapNoteId") MapNote#
+                    th(data-sortable="true" data-field="fieldPicturesMeta") FieldPic
+                    th(data-sortable="true" data-field="officer") Officer 
+                    th(data-sortable="true" data-field="reviewStartDate") Started 
+                    th(data-sortable="true" data-field="reviewCompleteDate") Completed 
+                    th(data-sortable="true" data-field="status") Status 
+                    th(data-sortable="true" data-field="priority") Priority 
+                    th(data-sortable="true" data-field="notes" data-visible="false") Notes
+                    if getLoggedUserRole === 'admin'
+                        th(data-sortable="true" data-field="deletedAt") deletedAt
+                        th(data-sortable="true" data-field="updatedAt") updatedAt 
+                    
+            tbody
+                each item in fieldReviewsData
+                    tr   
+                        td
+                            a(href='/fieldReviews/update?fieldReviewId='+item.id data-toggle='tooltip' title='Edit Profile')
+                                i.fas.fa-pen.customedit
+                        if getLoggedUserRole === 'admin'
+                            td 
+                                a(href='/fieldReviews/' + item.id + '/delete' data-toggle='tooltip' title='Delete/Restore')
+                                    i.fas.fa-trash.customedit
+                        td(align='center') #{item.id}
+                        td(align='center') #{item.tripRequestsId}
+                        td(align='center') #{item.TripRequestModel.bookingId}
+                        td(align='center') #{item.TripRequestModel.ClientProfileModel.clientId}
+                        td(align='center') #{item.TripRequestModel.ClientProfileModel.clientName}
+                        td(align='center') #{item.TripRequestModel.trips}
+                        td(align='center') #{item.reviewLocation}
+                        td(align='center')
+                            a(href=item.URLMapNote target='blank') #{item.mapNoteId}
+                        td(align='center') 
+                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button' onclick='showPic(' + JSON.stringify(item.fieldPicturesMeta) + ')' ) 
+                                if item.fieldPicturesMeta
+                                    i.fas.fa-eye.customedit &nbsp; #{item.fieldPicturesMeta.length}
+                                      
+                        td(align='center') #{item.OfficerModel.lastName +', ' + item.OfficerModel.firstName}
+                        td(align='center') #{item.reviewStartDate}
+                        td(align='center') #{item.reviewCompleteDate}
+                        td(align='center') #{item.status}
+                        td(align='center') #{item.priority}
+                        td(align='center') #{item.notes}
+                        if getLoggedUserRole === 'admin'
+                            td(align='center') #{item.deletedAt}
+                            td(align='center') #{item.updatedAt}
+

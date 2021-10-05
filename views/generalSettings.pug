@@ -1,0 +1,245 @@
+extends layout
+
+block content
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/settings') Settings
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li General Settings
+        .gradient
+            .username.userright #{user.username}
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    if (getLoggedUserRole === 'admin' && generalSettingsData !== null)
+        .container-fluid.card 
+            form#Form(method='POST' enctype='multipart/form-data' action='')
+                .form-row
+                    .form-group.required.col-md-2
+                        label.control-label(for='updatedAt') Record Last Updated Date: 
+                        input#updatedAt.form-control(type='datetime' placeholder='Record Last Updated at' name='updatedAt' readonly required='true' value=generalSettingsData.updatedAt)
+                    
+                        input#createdAt.form-control(type='hidden' placeholder='Record Created at' name='createdAt' readonly required='true' value=generalSettingsData.createdAt)
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='osmEndpoint') OSM Endpoint URL:
+                        input#osmEndpoint.form-control.form-control-md(type='text' placeholder='enter OSM Endpoint URL' name='osmEndpoint' required='true' value=generalSettingsData.osmEndpoint)
+                    .form-group.required.col-md-2
+                        label.control-label(for='osmUsername') OSM Username: 
+                        input#osmUsername.form-control(type='text' placeholder='Default OSM Username' name='osmUsername' required='true' value=generalSettingsData.osmUsername)    
+                    .form-group.required.col-md-2
+                        label.control-label(for='osmUserPass') OSM User Password: 
+                        input#osmUserPass.form-control(type='password' placeholder='OSM User Password' name='osmUserPass' required='true' value=osmUserPass) 
+                .form-row   
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='otpEndpoint') OTP Endpoint URL: 
+                        input#otpEndpoint.form-control.form-control-md(type='text' placeholder='enter OTP Endpoint URL' name='otpEndpoint' required='true' value=generalSettingsData.otpEndpoint)
+                    .form-group.required.col-md-2
+                        label.control-label(for='bboxLeft') Bounding Box Left: 
+                        input#bboxLeft.form-control(type='text' placeholder='Bounding Box Left' name='bboxLeft' required='true' value=bboxLeft)
+                    .form-group.required.col-md-2
+                        label.control-label(for='bboxBottom') Bounding Box Bottom: 
+                        input#bboxBottom.form-control(type='text' placeholder='Bounding Box Bottom' name='bboxBottom' required='true' value=bboxBottom)  
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='geocoderEndpoint') Geocoder Endpoint URL: 
+                        input#geocoderEndpoint.form-control(type='text' placeholder='Geocoder Endpoint URL' name='geocoderEndpoint' required='true' value=generalSettingsData.geocoderEndpoint)
+                        i Set to default: https://nominatim.openstreetmap.org/search
+                    .form-group.required.col-md-2
+                        label.control-label(for='bboxRight') Bounding Box Right: 
+                        input#bboxRight.form-control(type='text' placeholder='Bounding Box Right' name='bboxRight' required='true' value=bboxRight) 
+                    .form-group.required.col-md-2
+                        label.control-label(for='bboxTop') Bounding Box Top: 
+                        input#bboxTop.form-control(type='text' placeholder='Bounding Box Top' name='bboxTop' required='true' value=bboxTop)   
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='bingMapKey') Bing Map Service Key: 
+                        input#bingMapKey.form-control(type='text' placeholder='Bing Map Service Key' name='bingMapKey' required='true' value=generalSettingsData.bingMapKey)
+                        i example: AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L
+                    .form-group.col-md-2
+                            label.control-label(for='geoJSONFiles') Upload GeoJSON Files (max 7): 
+                            input#geoJSONFiles.form-control(type='file' accept='.geojson, application/json' name='geoJSONFiles' multiple value='')
+                    .form-group.col-md-2 
+                        label.control-label(for='geoJSONFiles') Records in Database:   
+                        textarea#resp.form-control( name="resp", readonly, rows="6", cols="30" )
+                            if (generalSettingsData.userSettings)
+                                each item in generalSettingsData.userSettings
+                                    | #{item.fileName + '\n'}
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='s3AccessKeyId') S3 Access Key Id: 
+                        input#s3AccessKeyId.form-control(type='password' placeholder='S3 Access Key Id' name='s3AccessKeyId' required='true' value=generalSettingsData.s3AccessKeyId)
+                    .form-group.required.col-md-2
+                        label.control-label(for='cognitoRegion') AWS Region: 
+                        input#cognitoRegion.form-control(type='text' placeholder='AWS Region' name='cognitoRegion' required='true' value=generalSettingsData.cognitoRegion)
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='s3SecretAccessKey') S3 Secret Access Key: 
+                        input#s3SecretAccessKey.form-control(type='password' placeholder='S3 Secret Access Key' name='s3SecretAccessKey' required='true' value=generalSettingsData.s3SecretAccessKey)
+                    .form-group.required.col-md-2
+                        label.control-label(for='s3BucketName') S3 Bucket Name: 
+                        input#s3BucketName.form-control(type='text' placeholder='S3 Bucket Name' name='s3BucketName' required='true' value=generalSettingsData.s3BucketName)
+                
+                //- Transport and Custom Tile
+                .form-row
+                    .form-group.col-md-2
+                        label.control-label(for='customTileLayerName') Custom Tile Layer Name: 
+                        input#customTileLayerName.form-control(type='text' placeholder='Custom Tile Layer Name' name='customTileLayerName' value=generalSettingsData.customTileLayerName)
+                    .form-group.col-md-2
+                        label.control-label(for='mapboxAccountName') Mapbox Account Name: 
+                        input#mapboxAccountName.form-control(type='text' placeholder='Mapbox Account Name' name='mapboxAccountName' value=generalSettingsData.mapboxAccountName)
+                    .form-group.col-md-2
+                        label.control-label(for='mapboxAccountStyleID') Mapbox Account Style-ID: 
+                        input#mapboxAccountStyleID.form-control(type='text' placeholder='Mapbox Account Style-ID' name='mapboxAccountStyleID' value=generalSettingsData.mapboxAccountStyleID)
+                    .form-group.col-md-4
+                        label.control-label(for='mapboxAccountKey') Mapbox Account Key: 
+                        input#mapboxAccountKey.form-control(type='password' placeholder='Mapbox Account Key' name='mapboxAccountKey'  value=generalSettingsData.mapboxAccountKey)
+
+                .form-row
+                    .form-group.required.col-md-2
+                        label.control-label(for='transportTileLayerKey') TunderForest Transport Tile Access Key: 
+                        input#transportTileLayerKey.form-control(type='password' placeholder='TunderForest Transport Tile Access Key' name='transportTileLayerKey' value=generalSettingsData.transportTileLayerKey)
+                        i Obtain from, https://www.thunderforest.com/
+
+                //- ToDo Delete/keep depending on MultiTenant Configuration
+                //- .form-row
+                //-     .form-group.required.col-md-6.margin
+                //-         label.control-label(for='cognitoUserPoolId') Cognito User Pool ID: 
+                //-         input#cognitoUserPoolId.form-control(type='text' placeholder='Cognito User Pool ID' name='cognitoUserPoolId' required='true' value=generalSettingsData.cognitoUserPoolId)
+                //-     .form-group.required.col-md-2
+                //-         label.control-label(for='cognitoRegion') Cognito Region: 
+                //-         input#cognitoRegion.form-control(type='text' placeholder='Cognito Region' name='cognitoRegion' required='true' value=generalSettingsData.cognitoRegion)
+                //-     .form-group.required.col-md-2
+                //-         label.control-label(for='cognitoTokenExpiration') Cognito Token Expiration: 
+                //-         input#cognitoTokenExpiration.form-control(type='text' placeholder='Cognito Token Expiration' name='cognitoTokenExpiration' required='true' value=generalSettingsData.cognitoTokenExpiration)
+                //- .form-row
+                //-     .form-group.required.col-md-6
+                //-         label.control-label(for='cognitoClientId') Cognito Client ID: 
+                //-         input#cognitoClientId.form-control(type='text' placeholder='Cognito Client ID' name='cognitoClientId' required='true' value=generalSettingsData.cognitoClientId)
+
+                .form-row                              
+                    .formfooter.col-md-12
+                        input.primarybutton.submit(type='submit' value='Update')
+                        input.secondarybutton.submit(type='button' value='Cancel' onclick="location.href='/settings';")
+            
+
+    if (getLoggedUserRole === 'admin' && generalSettingsData === null)
+        .container-fluid.card 
+            form#Form(method='POST' action='')
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        input#createdAt.form-control(type='hidden' placeholder='Record Created at' name='createdAt' readonly required='true' value='')
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='osmEndpoint') OSM Endpoint URL:
+                        input#osmEndpoint.form-control.form-control-md(type='text' placeholder='enter OSM Endpoint URL' name='osmEndpoint' required='true' value='')
+                    .form-group.required.col-md-2
+                        label.control-label(for='osmUsername') OSM Username: 
+                        input#osmUsername.form-control(type='text' placeholder='Default OSM Username' name='osmUsername' required='true' value='')    
+                    .form-group.required.col-md-2
+                        label.control-label(for='osmUserCipher') OSM User Password: 
+                        input#osmUserCipher.form-control(type='password' placeholder='Set Atfer Saving' name='osmUserCipher' readonly required='true' value='admin1234')
+                        i Set Password After Adding Record 
+    
+                .form-row   
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='otpEndpoint') OTP Endpoint URL: 
+                        input#otpEndpoint.form-control.form-control-md(type='text' placeholder='enter OTP Endpoint URL' name='otpEndpoint'  required='true' value='')
+                    .form-group.required.col-md-2
+                        label.control-label(for='bboxLeft') Bounding Box Left: 
+                        input#bboxLeft.form-control(type='text' placeholder='Bounding Box Left' name='bboxLeft' required='true' value='')
+                    .form-group.required.col-md-2
+                        label.control-label(for='bboxBottom') Bounding Box Bottom: 
+                        input#bboxBottom.form-control(type='text' placeholder='Bounding Box Bottom' name='bboxBottom' required='true' value='')
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='geocoderEndpoint') Geocoder Endpoint URL: 
+                        input#geocoderEndpoint.form-control(type='text' placeholder='Geocoder Endpoint URL' name='geocoderEndpoint' required='true' value='')
+                        i Set to default: https://nominatim.openstreetmap.org/search
+                    .form-group.required.col-md-2
+                        label.control-label(for='bboxRight') Bounding Box Right: 
+                        input#bboxRight.form-control(type='text' placeholder='Bounding Box Right' name='bboxRight' required='true' value='') 
+                    .form-group.required.col-md-2
+                        label.control-label(for='bboxTop') Bounding Box Top: 
+                        input#bboxTop.form-control(type='text' placeholder='Bounding Box Top' name='bboxTop' required='true' value='')  
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='bingMapKey') Bing Map Service Key: 
+                        input#bingMapKey.form-control(type='text' placeholder='Bing Map Service Key' name='bingMapKey' required='true' value='')
+                        i example: AuhiCJHlGzhg93IqUH_oCpl_-ZUrIE6SPftlyGYUvr9Amx5nzA-WqGcPquyFZl4L
+                    .form-group.col-md-2
+                        label.control-label(for='geoJSONFiles') Upload GeoJSON Files (max 7): 
+                        i Upload GeoJSON Files After Adding Record 
+                    .form-group.col-md-2 
+                        label.control-label(for='geoJSONFiles') Records in Database:   
+                        textarea#resp.form-control( name="resp", readonly, rows="6", cols="30" )
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='s3AccessKeyId') S3 Access Key Id: 
+                        input#s3AccessKeyId.form-control(type='text' placeholder='S3 Access Key Id' name='s3AccessKeyId' required='true' value='')
+                    .form-group.required.col-md-2
+                        label.control-label(for='cognitoRegion') AWS Region: 
+                        input#cognitoRegion.form-control(type='text' placeholder='AWS Region' name='cognitoRegion' required='true' value='')
+                .form-row
+                    .form-group.required.col-md-6.margin
+                        label.control-label(for='s3SecretAccessKey') S3 Secret Access Key: 
+                        input#s3SecretAccessKey.form-control(type='text' placeholder='S3 Secret Access Key' name='s3SecretAccessKey' required='true' value='')
+                    .form-group.required.col-md-2
+                        label.control-label(for='s3BucketName') S3 Bucket Name: 
+                        input#s3BucketName.form-control(type='text' placeholder='S3 Bucket Name' name='s3BucketName' required='true' value='')
+
+                //- Transport and Custom Tile
+                .form-row
+                    .form-group.col-md-2
+                        label.control-label(for='customTileLayerName') Custom Tile Layer Name: 
+                        input#customTileLayerName.form-control(type='text' placeholder='Custom Tile Layer Name' name='customTileLayerName' value=generalSettingsData.customTileLayerName)
+                    .form-group.col-md-2
+                        label.control-label(for='mapboxAccountName') Mapbox Account Name: 
+                        input#mapboxAccountName.form-control(type='text' placeholder='Mapbox Account Name' name='mapboxAccountName' value=generalSettingsData.mapboxAccountName)
+                    .form-group.col-md-2
+                        label.control-label(for='mapboxAccountStyleID') Mapbox Account Style-ID: 
+                        input#mapboxAccountStyleID.form-control(type='text' placeholder='Mapbox Account Style-ID' name='mapboxAccountStyleID' value=generalSettingsData.mapboxAccountStyleID)
+                    .form-group.col-md-4
+                        label.control-label(for='mapboxAccountKey') Mapbox Account Key: 
+                        input#mapboxAccountKey.form-control(type='password' placeholder='Mapbox Account Key' name='mapboxAccountKey'  value=generalSettingsData.mapboxAccountKey)
+
+                .form-row
+                    .form-group.required.col-md-2
+                        label.control-label(for='transportTileLayerKey') TunderForest Transport Tile Access Key: 
+                        input#transportTileLayerKey.form-control(type='password' placeholder='TunderForest Transport Tile Access Key' name='transportTileLayerKey' value=generalSettingsData.transportTileLayerKey)
+                        i Obtain API Key from, https://www.thunderforest.com/
+
+                //- ToDo Delete/keep depending on MultiTenant Configuration
+                //- .form-row
+                //-     .form-group.required.col-md-6.margin
+                //-         label.control-label(for='cognitoUserPoolId') Cognito User Pool ID: 
+                //-         input#cognitoUserPoolId.form-control(type='text' placeholder='Cognito User Pool ID' name='cognitoUserPoolId' required='true' value='')
+                //-     .form-group.required.col-md-2
+                //-         label.control-label(for='cognitoRegion') Cognito Region: 
+                //-         input#cognitoRegion.form-control(type='text' placeholder='Cognito Region' name='cognitoRegion' required='true' value='')
+                //-     .form-group.required.col-md-2
+                //-         label.control-label(for='cognitoTokenExpiration') Cognito Token Expiration: 
+                //-         input#cognitoTokenExpiration.form-control(type='text' placeholder='Cognito Token Expiration' name='cognitoTokenExpiration' required='true' value='')
+                //- .form-row
+                //-     .form-group.required.col-md-6
+                //-         label.control-label(for='cognitoClientId') Cognito Client ID: 
+                //-         input#cognitoClientId.form-control(type='text' placeholder='Cognito Client ID' name='cognitoClientId' required='true' value='')
+    
+                .form-row
+                    .formfooter.col-md-12
+                        input.primarybutton.submit(type='submit' value='Add')
+                        input.secondarybutton.submit(type='button' value='Cancel' onclick="location.href='/settings';")
+    
+    if s_status == 'Record Updated'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/settings/general';") Go to General Settings
+ 
+    if s_status == 'Error updating record'
+        .notifydiv
+            h1=s_status
+            img.notifywarningicon(src='/images/warningnotify.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/settings/general';") Go to General Settings

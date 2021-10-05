@@ -1,0 +1,110 @@
+extends layout
+
+block content
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/clients/list') Clients List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Update Client
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+    
+    if client_search_result && !(search_result_count === 0)
+        .topbar
+            .enterdetail
+                form(action="" method="GET")
+                    label(for = "clientId") 
+                    input.searchbox.inp-icon(
+                        type="search"
+                        id="clientId"
+                        name="clientId"
+                        required='true'
+                        placeholder='search by client id'
+                        value=''
+                        )
+
+        .formcontainer 
+            form(method='POST' action='')
+                .form-row
+                    .form-group.col-md-6
+                        label(for='clientId') Client ID: 
+                        input#clientId.form-control(type='number' placeholder='enter first name' name='clientId'  readonly required='true' value=client_search_result[0].dataValues.clientId min=0 )
+                    .form-group.col-md-6
+                        label(for='clientName') Full Name: 
+                        input#clientName.form-control(pattern= "^[a-zA-Z_ ]*$" placeholder='enter full name' name='clientName' required='true' value=client_search_result[0].dataValues.clientName)
+                    .form-group.col-md-6
+                        label(for='conditions') Eligibility Conditions: 
+                        select#conditions.form-control.custom-select(type='select' name="conditions" multiple value=client_search_result[0].dataValues.conditions ? client_search_result[0].dataValues.conditions.toString() : '-')
+                            option(value=client_search_result[0].dataValues.conditions ? client_search_result[0].dataValues.conditions.toString() : '-', selected, label=client_search_result[0].dataValues.conditions ? client_search_result[0].dataValues.conditions.toString() : '-')
+                            if lookupCodes
+                                each value, i in lookupCodes
+                                    if value.conditions
+                                        option(value=value.conditions, label=value.conditions)
+                    .form-group.col-md-6
+                        label(for='mobAids') Mobility Aid: 
+                        select#mobAids.form-control.custom-select(type='select' name="mobAids" multiple value=client_search_result[0].dataValues.mobAids ? client_search_result[0].dataValues.mobAids.toString() : '-')
+                            option(value=client_search_result[0].dataValues.mobAids ? client_search_result[0].dataValues.mobAids.toString() : '-', selected, label=client_search_result[0].dataValues.mobAids ? client_search_result[0].dataValues.mobAids.toString() : '-')
+                            if lookupCodes
+                                each value, i in lookupCodes
+                                    if value.mobAids
+                                        option(value=value.mobAids, label=value.mobAids)
+                    .form-group.col-md-6
+                        label(for='prefSpaceType') Space Type: 
+                        select#prefSpaceType.form-control.custom-select(type='select' name="prefSpaceType" multiple value=client_search_result[0].dataValues.prefSpaceType ? client_search_result[0].dataValues.prefSpaceType.toString() : '-')
+                            option(value=client_search_result[0].dataValues.prefSpaceType ? client_search_result[0].dataValues.prefSpaceType.toString() : '-', selected, label=client_search_result[0].dataValues.prefSpaceType ? client_search_result[0].dataValues.prefSpaceType.toString() : '-')
+                            if lookupCodes
+                                each value, i in lookupCodes
+                                    if value.prefSpaceType
+                                        option(value=value.prefSpaceType, label=value.prefSpaceType)
+                    .form-group.col-md-6
+                        label(for='btt') BTT:
+                        select#btt.form-control(type='select' name = "btt" value=client_search_result[0].dataValues.btt)
+                            option(value=client_search_result[0].dataValues.btt, selected=client_search_result[0].dataValues.btt, label=client_search_result[0].dataValues.btt) 
+                            option(value='Approved', label="Approved")
+                            option(value='Did Not Complete', label= "Did Not Complete")
+                            option(value='Not Recommended', label= "Not Recommended")
+                            option(value='Referred', label= "Referred")
+                            option(value='Refused', label= "Refused")
+                            option(value='Trained', label= "Trained")
+                            option(value='Unable to Contact', label= "Unable to Contact")
+                    .form-group.col-md-6
+                        label(for='clientStatus') Client Active: 
+                        select#clientStatus.form-control(type='select' name = "clientStatus" value=client_search_result[0].dataValues.clientStatus)
+                            option(value=client_search_result[0].dataValues.clientStatus.toString(), selected, label=client_search_result[0].dataValues.clientStatus.toString()) 
+                            option(value='true', label="True" )
+                            option(value='false', label="False")
+                    .form-group.col-md-12
+                        label(for='notes') Notes: 
+                        input#notes.form-control(type='text' placeholder='enter notes' name='notes' value=client_search_result[0].dataValues.notes)
+                        p
+                    .formfooter
+                        input.primarybutton.submit(type='submit' value='Save Changes')
+                        input.secondarybutton.submit(type='button' value='Cancel' onclick="location.href='/clients/list';")
+        
+
+    if  search_result_count === 0
+        h3 No Records Found
+
+    if s_status == 'Record updated'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/clients/list';") Go to Clients List
+ 
+
+    if s_status == 'Error updating record'
+        .notifydiv
+            h1=s_status
+            img.notifywarningicon(src='/images/warningnotify.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/clients/list';") Go to Clients List
+
+   
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg

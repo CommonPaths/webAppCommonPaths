@@ -1,0 +1,113 @@
+extends layout
+    
+block content
+ 
+
+    script.
+        window.icons = {
+            columns: 'ion-md-menu',
+            fullscreen: 'ion-md-expand',
+            export: 'ion-md-download',
+            toggleOff: 'ion-md-arrow-down',
+            toggleOn: 'ion-md-arrow-up'   
+        }
+
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/settings') Settings
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Officers List
+        .gradient
+            .username.userright #{user.username}
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+        
+    
+    .tablecontainer.table-sm
+        #toolbar.addbutton
+            button.primarybutton.right(onclick="location.href='/officers/create';") 
+                .addclienticon
+                    iconify-icon(data-icon='ant-design:user-add-outlined')
+                    span.addclientlabel Add
+        table.table.btn-table.table-responsive.w-auto.table-striped.table-borderless(
+            id="table"
+            data-toggle="table"
+            data-show-toggle="true"
+            data-toolbar="#toolbar" 
+            data-search="true" 
+            data-show-refresh="false"
+            data-show-fullscreen="true" 
+            data-show-columns="true" 
+            data-show-columns-toggle-all="true" 
+            data-detail-view="true" 
+            data-show-export="true" 
+            data-minimum-count-columns="2"  
+            data-pagination="true" 
+            data-page-list="[10, 25, 50, 100, all]" 
+            data-show-footer="true"
+            data-icons-prefix="icon"
+            data-icons="icons"
+            data-show-detail-view="false"
+           )
+            
+            thead.bg-color
+                tr 
+                    th
+                        button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button')
+                    if getLoggedUserRole === 'admin'
+                        th
+                            button.btn.btn-teal.btn-rounded.btn-sm.m-0(type='button') 
+                    th(data-sortable="true" data-field="id") Id
+                    th(data-sortable="true" data-field="firstName") FirstName  
+                    th(data-sortable="true" data-field="lastName") LastName 
+                    th(data-sortable="true" data-field="eMail") email
+                    th(data-sortable="true" data-field="idNumber") OfficerID
+                    th(data-sortable="true" data-field="cognitoSub") CognitoSub  
+                    th(data-sortable="true" data-field="officerTitle") OfficerTitle 
+                    th(data-sortable="true" data-field="officerRoles") OfficerRole
+                    th(data-sortable="true" data-field="agency") Agency
+                    th(data-sortable="true" data-field="zoneZips") Field Assignment Area
+                    th(data-sortable="true" data-field="active") Active
+                    if getLoggedUserRole === 'admin'
+                        th(data-sortable="true" data-field="createdAt") createdAt
+                        th(data-sortable="true" data-field="deletedAt") deletedAt
+                        th(data-sortable="true" data-field="updatedAt") updatedAt 
+                    
+            tbody
+                each item in oData
+                    tr     
+                        td
+                            a(href='/officers/update?id='+item.id data-toggle='tooltip' title='Edit Profile')
+                                i.fas.fa-pen.customedit
+                        if getLoggedUserRole === 'admin'
+                            td 
+                                a(href='/officers/' + item.id + '/delete' data-toggle='tooltip' title='Delete/Restore')
+                                    i.fas.fa-trash.customedit
+                        td(align='center') #{item.id}
+                        td(align='center') #{item.firstName}
+                        td(align='center') #{item.lastName}
+                        td(align='center') #{item.eMail}
+                        td(align='center') #{item.idNumber}
+                        td(align='center') #{item.cognitoSub}
+                        td(align='center') #{item.officerTitle}
+                        td(align='center') #{item.officerRoles}
+                        td(align='center') #{item.agency}
+                        td(align='center') #{item.zoneZips}
+                        td(align='center') #{item.active}
+                        if getLoggedUserRole === 'admin'
+                            td(align='center') #{item.createdAt}
+                            td(align='center') #{item.deletedAt}
+                            td(align='center') #{item.updatedAt}
+            tfoot
+                tr
+                    th(colspan='12')
+        
+        //- TODO: this is for lookup dropdowns next sprint
+        //- if lookupCodes
+        //-     p
+        //-     each value, i in lookupCodes
+        //-         if value.conditions
+        //-             p #{value.conditions} , #{value.conditionsDesc}
+
+

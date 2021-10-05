@@ -1,0 +1,5 @@
+version: 0.0
+os: linux
+files:
+ - source: .
+   destination: /data/webapp1/MVT--Phase-2.0

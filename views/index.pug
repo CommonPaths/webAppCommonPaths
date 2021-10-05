@@ -1,0 +1,174 @@
+head
+  meta(charset='UTF-8')
+  link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous")
+  link(rel='stylesheet' type='text/css' href='/stylesheets/login.css')
+  script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous")
+  script(src='https://code.jquery.com/jquery-3.4.1.js') 
+  script(src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous")
+  
+
+
+  body
+  .container-fluid.fullheight
+      .row.fullheight
+        #hide.col-8.animation.p-0.fullheight
+          .col-12
+            p.welcomesvg
+              | Welcome to  
+              span(style='color:#D2743D;')  CommonPaths
+          #hide.col-12
+              <svg width="100%" height="100%" viewBox="0 0 1100 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M286 542.5L496.5 420.5" stroke="url(#paint0_linear)" stroke-width="3"/>
+                <path d="M1026 451L876.5 362.5" stroke="url(#paint1_linear)" stroke-width="3"/>
+                <path d="M157.5 535L279 466.5H350.5L497 381.5L566 380L611.5 354.5" stroke="url(#paint2_linear)" stroke-width="3"/>
+                <path d="M978.5 540.5L772 421L807 400.5L804.5 362.5" stroke="url(#paint3_linear)" stroke-width="3"/>
+                <path d="M655.379 56.5326C603.485 56.8286 562.258 98.1368 562.581 149.512C562.693 167.28 568.129 180.972 577.505 194.834L647.071 297.963C649.182 301.081 652.794 303.082 656.928 303.059C661.062 303.035 664.696 300.944 666.72 297.851L734.985 193.936C744.186 179.968 749.45 166.215 749.338 148.447C749.016 97.0717 707.272 56.2367 655.379 56.5326ZM656.282 200.307C627.636 200.471 604.244 177.588 604.066 149.18C603.887 120.771 626.99 97.6232 655.636 97.4598C684.282 97.2964 707.674 120.179 707.852 148.588C708.031 176.996 684.928 200.144 656.282 200.307Z" fill="url(#paint4_linear)"/>
+                <path d="M1 230.5L315.5 409H384.5L544 316.5L576.5 336" stroke="#7278C8" stroke-width="3"/>
+                <path d="M1025.5 2L976.5 32.5V71L784.5 179.5L816 199.5L749.5 239" stroke="url(#paint5_linear)" stroke-width="3"/>
+                <path d="M521 538L513 533.5L509 526.5V491L770 342L736.5 321.5" stroke="#7278C8" stroke-width="3"/>
+                <path d="M32 140.5L211.5 245.5H283.5L439 336L473.5 316.5L441 297" stroke="url(#paint6_linear)" stroke-width="3"/>
+                <path d="M245 16L576.5 208L477.5 266.5L509 287" stroke="url(#paint7_linear)" stroke-width="3"/>
+                <path d="M452 487L703 343.5" stroke="#7278C8" stroke-width="3"/>
+                <path d="M1024.5 237.5L840 343L805 323" stroke="url(#paint8_linear)" stroke-width="3"/>
+                <path d="M1025.5 119.5L978 146.5L975.5 185L852 256L884 277L975.5 225.5" stroke="#7278C8" stroke-width="3"/>
+                <path d="M1024.5 80L887.5 159.5L883.5 199.5L783.5 257L816 277L771.5 303.5" stroke="url(#paint9_linear)" stroke-width="3"/>
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                <animateMotion dur="5s" repeatCount="indefinite" path="M286 543L496.5 421"></animateMotion>
+                </circle>
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M1026 451.5L876.5 363"></animateMotion>
+                </circle>
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M157.5 535.5L279 467H350.5L497 382L566 380.5L611.5 355"></animateMotion>
+                </circle> 
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M978.5 541L772 421.5L807 401L804.5 363"></animateMotion>
+                </circle> 
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M1025.5 2L976.5 32.5V71L784.5 179.5L816 199.5L749.5 239"></animateMotion>
+                </circle>
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M521 538L513 533.5L509 526.5V491L770 342L736.5 321.5"></animateMotion>
+                </circle> 
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M32 140.5L211.5 245.5H283.5L439 336L473.5 316.5L441 297"></animateMotion>
+                </circle> 
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M245 16L576.5 208L477.5 266.5L509 287"></animateMotion>
+                </circle> 
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M452 487L703 343.5"></animateMotion>
+                </circle> 
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M1024.5 237.5L840 343L805 323"></animateMotion>
+                </circle> 
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M1025.5 120L978 147L975.5 185.5L852 256.5L884 277.5L975.5 226"></animateMotion>
+                </circle> 
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M1024.5 80.5L887.5 160L883.5 200L783.5 257.5L816 277.5L771.5 304"></animateMotion>
+                </circle> 
+                <circle r="4" fill="#7278C8" z-index=55 style="filter: url(#f1);"> 
+                  <animateMotion dur="5s" repeatCount="indefinite" path="M1 230.5L315.5 409H384.5L544 316.5L576.5 336"></animateMotion>
+                </circle>
+                  <filter id="f1" x="-100%" y="-80%" width="180%" height="180%" filterUnits="userSpaceOnUse" >
+                      <feColorMatrix result="offsetblur" in="offOut" type="matrix"/>
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="10" /> 
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="blur"/>
+                            <feOffset in="blur" dx="5" dy="5" result="offsetBlur" stdDeviation="1.7"/>
+                            <feFlood flood-color="white" flood-opacity="5" result="offsetColor"/>
+                            <feComposite in="offsetColor" in2="offsetBlur" operator="in" result="offsetBlur"/>
+                                <feMerge> 
+                                  <feMergeNode/>
+                                  <feMergeNode in="SourceGraphic"/>
+                                  <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                  </filter>
+                <defs>
+                <linearGradient id="paint0_linear" x1="391.25" y1="421" x2="391.25" y2="543" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7278C8"/>
+                <stop offset="1" stop-color="#7278C8" stop-opacity="0.44"/>
+                </linearGradient>
+                <linearGradient id="paint1_linear" x1="880" y1="369" x2="1026" y2="451.5" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7278C8"/>
+                <stop offset="1" stop-color="#7278C8" stop-opacity="0.54"/>
+                </linearGradient>
+                <linearGradient id="paint2_linear" x1="384.5" y1="355" x2="384.5" y2="535.5" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7278C8"/>
+                <stop offset="1" stop-color="#7278C8" stop-opacity="0.38"/>
+                </linearGradient>
+                <linearGradient id="paint3_linear" x1="804" y1="363.5" x2="979" y2="545" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7278C8"/>
+                <stop offset="1" stop-color="#7278C8" stop-opacity="0.5"/>
+                </linearGradient>
+                <linearGradient id="paint4_linear" x1="662.285" y1="206.042" x2="657.421" y2="303.083" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ED933F"/>
+                <stop offset="1" stop-color="#EEC177"/>
+                </linearGradient>
+                <linearGradient id="paint5_linear" x1="887.5" y1="2" x2="887.5" y2="239" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7278C8"/>
+                <stop offset="1" stop-color="#7278C8" stop-opacity="0.98"/>
+                </linearGradient>
+                <linearGradient id="paint6_linear" x1="479" y1="313" x2="74.5" y2="168.5" gradientUnits="userSpaceOnUse">
+                <stop offset="0.795764" stop-color="#7278C8"/>
+                <stop offset="1" stop-color="#7278C8" stop-opacity="0.27"/>
+                </linearGradient>
+                <linearGradient id="paint7_linear" x1="495" y1="271.5" x2="250" y2="16.5" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7278C8"/>
+                <stop offset="1" stop-color="#7278C8" stop-opacity="0.08"/>
+                </linearGradient>
+                <linearGradient id="paint8_linear" x1="810" y1="327" x2="1027" y2="239" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7278C8"/>
+                <stop offset="1" stop-color="#7278C8" stop-opacity="0.47"/>
+                </linearGradient>
+                <linearGradient id="paint9_linear" x1="774.5" y1="304.5" x2="1025" y2="80.5" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#7278C8"/>
+                <stop offset="1" stop-color="#7278C8" stop-opacity="0.65"/>
+                </linearGradient>
+                </defs>
+              </svg>    
+        .col-4.p-0.fullheight
+          .login-div
+            form(method='POST' action='')
+              // ROUTE TO HOME PAGE IF VALIDATED LOGIN DETAILS
+              .logo
+                img.img(src='../images/blacklogo.png')
+              if s_status
+                h3(style="color:Tomato; height:20px; text-align:center") #{s_status}
+            .container
+              #login-row.row.justify-content-center.align-items-center
+                #login-column.col-md-10
+                  #login-box.col-md-12
+                    form#login-form.form(action='' method='post')
+                      p.text-center.title-label CommonPaths Login
+                      .form-group
+                        label.field-label(for='username') Username
+                        br
+                        input#username.form-control(type='username' name='userName')
+                      .form-group
+                        label.field-label(for='password') Password
+                        br
+                        input#password.form-control(type='password' name='passWord')                        
+                      .form-group
+                        .custom-control.custom-checkbox.checkbox-lg
+                          input#checkbox-3.custom-control-input(type='checkbox' onclick='showPassword()')
+                          label.custom-control-label.showpassword(for='checkbox-3') Show Password
+                      .form-group
+                        label.text-info(for='remember-me')
+                        input.btn.btn-info.btn-md(type='submit' value='Login')
+                      .link
+                        a(href='/login/forgotpassword') Forgot password?
+                  
+  script.
+    function showPassword() {
+      var x = document.getElementById("password");
+      if (x.type === "password") {
+        x.type = "text";
+      } else {
+        x.type = "password";
+      }
+    }
+  
+
+
+        

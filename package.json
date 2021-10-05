@@ -1,0 +1,73 @@
+{
+  "name": "commonpaths",
+  "version": "3.0.0",
+  "description": "Web-Application that manages pathways review for people with disability's, rider requests",
+  "private": true,
+  "scripts": {
+    "start": "NODE_ENV=production node ./bin/www",
+    "devstart": "DEBUG=commonpaths:* nodemon ./bin/www",
+    "serverstart": "DEBUG=commonpaths:* npm run test",
+    "test": "jest",
+    "testserver": "DEBUG=commonpaths:* NODE_ENV=test node ./bin/www",
+    "prodserver": "NODE_ENV=production node ./bin/www",
+    "devserver": "DEBUG=commonpaths:* NODE_ENV=development nodemon ./bin/www",
+    "sequelize:kcm_dev:migrate": "sequelize --options-path ./.sequelize-kcm_dev --env kcm_dev db:migrate",
+    "sequelize:kcm_dev:migrate:status": "sequelize --options-path ./.sequelize-kcm_dev --env kcm_dev db:migrate:status",
+    "sequelize:kcm_dev:seed:all": "sequelize --options-path ./.sequelize-kcm_dev --env kcm_dev db:seed:all",
+    "sequelize:kcm_dev:migrate:undo": "sequelize --options-path ./.sequelize-kcm_dev --env kcm_dev db:migrate:undo",
+    "sequelize:kcm_dev:migrate:undo:all": "sequelize --options-path ./.sequelize-kcm_dev --env kcm_dev db:migrate:undo:all"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.dxc.com:mv-transportation/MVT--Phase-2.0.git"
+  },
+  "keywords": [
+    "commonpaths"
+  ],
+  "author": "DXC Technology",
+  "license": "OSL Version 3.0, CopyRight DXC Technology",
+  "dependencies": {
+    "accesscontrol": "^2.2.1",
+    "amazon-cognito-identity-js": "^5.2.0",
+    "aws-sdk": "^2.998.0",
+    "bbox-intersect": "^0.1.2",
+    "body-parser": "^1.19.0",
+    "bootstrap-table": "^1.18.3",
+    "browserify": "^17.0.0",
+    "browserify-shim": "^3.8.14",
+    "cognito-express": "^2.0.19",
+    "compression": "^1.7.4",
+    "cookie-parser": "~1.4.5",
+    "crypto-js": "^4.1.1",
+    "debug": "~4.3.2",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "fetch-jsonp": "^1.2.1",
+    "fs": "0.0.1-security",
+    "helmet": "^4.6.0",
+    "http-errors": "~1.8.0",
+    "jquery": "^3.6.0",
+    "leaflet": "^1.7.1",
+    "leaflet-bing-layer": "^3.3.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "morgan": "~1.10.0",
+    "multer": "^1.4.3",
+    "npm": "^7.24.1",
+    "pg": "^8.7.1",
+    "pg-hstore": "^2.3.4",
+    "polyfill": "^0.1.0",
+    "pug": "^3.0.2",
+    "sequelize": "^6.6.5",
+    "serve-static": "^1.14.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.24.2",
+    "jest": "^27.2.4",
+    "nodemon": "^2.0.13",
+    "sequelize-cli": "^6.2.0",
+    "supertest": "^6.1.6"
+  }
+}

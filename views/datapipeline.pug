@@ -1,0 +1,190 @@
+extends layout
+
+block content
+  script.
+      $( document ).ready(function() {
+      search("");
+      });
+
+      $(document).ready(function(){
+      $('button').click(function(){
+      $('.alert').show()
+      }) 
+      });
+      let date;
+      const URLOSMBase = !{JSON.stringify(settingsRecord.osmEndpoint)};
+      const reconCntrlBtn = "/recon_ctrl/button";
+      const ec2instance = "/reconciliation/node";
+      const exportDownload = "/recon_export/download_osc";
+      const reconciliationUpdate = "/reconciliation/update?node_id=";
+      let reconCntrlBtnUrl = URLOSMBase + reconCntrlBtn ;
+      let ec2instanceUrl = URLOSMBase + ec2instance ;
+      let exportDownloadUrl = URLOSMBase + exportDownload ;
+      let reconciliationUpdateUrl = URLOSMBase + reconciliationUpdate ;
+      const ec2instanceDate = "/reconciliation/read_last_timestamp";
+      const ec2instanceDateUrl = URLOSMBase + ec2instanceDate;
+      
+      async function fetchText() {
+      let response = await fetch(ec2instanceDateUrl);
+      date = await response.text();
+      }
+
+      function search(search_val) {
+        fetchText();
+        $("#maintbody").empty();
+          $.getJSON(ec2instanceUrl, {format: "json"}, function(apiData){
+            let x = document.getElementById("datedis");
+            x.append(date); 
+            result = apiData.filter(item => JSON.stringify(item).includes(search_val));
+            result.map((d,i) => {
+              $("#maintbody").append('<tr data-toggle="collapse" id="table'+i+'" data-target=".table'+i+'" id="row-color">'
+                              + '<td><i class="fa fa-chevron-down" aria-hidden="true"></i></td>'
+                              + '<td>'+d.node_id+'</td>' 
+                              + '<td>'+d.req_recon+'</td>'
+                              + '<td>'+d.type_of_change+'</td>'
+                              + '<td>'+JSON.parse(d.public_node_data).user+'</td>'
+                              + '<td>'+JSON.parse(d.public_node_data).lat+'</td>'
+                              + '<td>'+JSON.parse(d.public_node_data).lon+'</td>'
+                              + '<td><button type="button" id="disablebtn" onclick="return closeWindow('+d.node_id+');"  class="secondarybutton">Select Public</button></td>'
+                            + '</tr>'
+                            + '<tr class="collapse table'+i+'">'
+                              + '<td colspan="999">'
+                                + '<div>'
+                                  + '<table class="table">'
+                                    + '<thead>'
+                                    + '<tr>'
+                                      + '<th>private_tags</th>'
+                                      + '<th>public_tags</th>'
+                                      + '<th>lat</th>'
+                                      + '<th>lon</th>'
+                                    + '</tr>'
+                                  + '</thead>'
+                                  + '<tbody>'
+                                    + '<tr id="table-bg-color">'
+                                      + '<td>'+(JSON.stringify(d.private_tags)).replace(/\\"/g,"")+'</td>'
+                                      + '<td>'+(JSON.stringify(d.public_tags)).replace(/\\"/g,"")+'</td>'
+                                      + '<td>'+JSON.parse(d.public_node_data).lat+'</td>'
+                                      + '<td>'+JSON.parse(d.public_node_data).lon+'</td>'
+                                    + '</tr>'
+                                  + '</tbody>'
+                                  + '</table>'
+                                + '</div>'
+                              + '</td>'
+                            + '</tr>');
+              });  
+            });   
+        }
+       
+    function downloadCSV(csv, filename) {
+    let csvFile;
+    let downloadLink;
+
+        // CSV file
+        csvFile = new Blob([csv], {type: "text/csv"});
+
+        // Download link
+        downloadLink = document.createElement("a");
+
+        // File name
+        downloadLink.download = filename;
+
+        // Create a link to the file
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+
+        // Hide download link
+        downloadLink.style.display = "none";
+
+        // Add the link to DOM
+        document.body.appendChild(downloadLink);
+
+        // Click download link
+        downloadLink.click();
+    }
+
+    function exportTableToCSV(filename) {
+        let csv = [];
+        let rows = document.querySelectorAll("table tr");
+        
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll("td, th");
+            
+            for (let j = 0; j < cols.length; j++) 
+                row.push(cols[j].innerText);
+            
+            csv.push(row.join(","));        
+        }
+
+        // Download CSV file
+        downloadCSV(csv.join("\n"), filename);
+    }
+
+
+    window.icons = {
+      columns: 'ion-md-menu',
+      fullscreen: 'ion-md-expand',
+      export: 'ion-md-download',
+      detailOpen: 'ion-md-arrow-down',
+      detailClose: 'ion-md-arrow-up'   
+      }
+
+  .topnav
+      ul.breadcrumb
+          li
+              a(href='/dataPipeline') Data Pipeline
+                  i.fa.fa-caret-right(aria-hidden='true')
+          li Import Control Panel
+      .gradient
+        .username.userright #{user.username}
+          i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+  .tableheader
+    h7#datedis Last Reconciled on: 
+  .tablecontainer.table-sm
+      table.table.btn-table.table-responsive.w-auto.table-striped.table-borderless(
+            id="table"
+            data-toggle="table"
+            data-toolbar="#toolbar" 
+            data-search="false" 
+            data-show-refresh="false"
+            data-show-fullscreen="true" 
+            data-show-columns="true" 
+            data-show-columns-toggle-all="true" 
+            data-detail-view="false" 
+            data-show-export="true" 
+            data-minimum-count-columns="2"  
+            data-pagination="true" 
+            data-page-list="[10, 25, 50, 100, all]" 
+            data-show-footer="true"
+            data-icons-prefix="icon"
+            data-icons="icons"
+            data-show-detail-view="false" 
+           )
+        thead
+          tr
+            th 
+            th(data-sortable="true") Node ID
+            th(data-sortable="true") Requested Reconciliation
+            th(data-sortable="true") Change Type
+            th(data-sortable="true") User
+            th(data-sortable="true") Lat
+            th(data-sortable="true") Lon
+
+              th
+                .search(style='float: right;')
+                  input#search.form-control(type='text' placeholder='Search' name='search' onchange='search(this.value)')
+          tbody#maintbody
+      button.primarybutton(type='button'  onclick="window.location.href = exportDownloadUrl;") Download-Import-OSC 
+      button.primarybutton(type='button' onclick="reconcomplete()")  Import-to-private-OSM
+
+  script.
+    function closeWindow(index){
+      $.getJSON(reconciliationUpdateUrl+index);
+      window.location.reload(true);
+      alert("Node Updated!");  
+    }
+
+    function reconcomplete(){
+      $.getJSON(reconCntrlBtnUrl);
+      window.location.reload(true);
+      alert("Data Imported!");
+    }

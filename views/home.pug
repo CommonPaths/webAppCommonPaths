@@ -1,0 +1,165 @@
+extends layout
+
+block content
+
+  .header
+    a.pagetitle
+      | Dashboard
+    .weatherwidget
+      a.weatherwidget-io(href='https://forecast7.com/en/47d55n121d98/king-county/?unit=us' data-font='Times New Roman' data-icons='Climacons Animated' data-mode='Current')
+
+  .container.homecontent
+    .row.homewelcomecenter
+      .floatleftwelcome
+        strong Hello, #{user.username} !
+        p.welcomemessage Welcome to CommonPaths
+          
+
+    .row.hideforAgencyUser.quickstats
+      a(href='/tripRequests/list')
+        .quickstats_cardbody
+          .row
+            .col-8
+              p.stattitle Trip History Reviews
+            .col-4
+              p.viewall.float-right View all
+          .row
+            .col-8.statnumbertitle
+              h5 Pending
+            .col-4
+              p.statnumber.float-right #{tripRequestCountByUser}
+          .row
+            .col-8.statnumbertitle
+              h5 Total
+            .col-4
+              p.statnumber.float-right #{tripRequestCountTotal}
+      a(href='/reviews')
+        .quickstats_cardbody
+          .row
+            .col-8
+              p.stattitle Desktop Reviews
+            .col-4
+              p.viewall.float-right View all
+          .row
+            .col-8.statnumbertitle
+              h5 Pending
+            .col-4
+              p.statnumber.float-right #{desktopReviewCountByUser}
+          .row
+            .col-8.statnumbertitle
+              h5 Total
+            .col-4
+              p.statnumber.float-right #{desktopReviewCountTotal}
+      a(href='/reviews')
+        .quickstats_cardbody
+          .row
+            .col-8
+              p.stattitle Field Reviews
+            .col-4
+              p.viewall.float-right View all
+          .row
+            .col-8.statnumbertitle
+              h5 Pending
+            .col-4
+              p.statnumber.float-right #{fieldReviewCountByUser}
+          .row
+            .col-8.statnumbertitle
+              h5 Total
+            .col-4
+              p.statnumber.float-right #{fieldReviewCountTotal}
+    .row.hideforAgencyUser
+      .col-sm-8.col-12.todolistcontainer
+        .rssfeedicon
+          img.rssfeedipng(src='../images/rssfeed.png' alt="rss feed below" width="40" height="40")
+        p.feed Activity Feed for Field-Reviews Map-Notes
+        hr
+        .log(id='rss-feeds')
+      .col-sm-4.col-12
+        .todolistcontainer
+          i.bi.bi-card-checklist
+          p.todo Create your To-Do list
+          .todocontainer
+            form(action='#')
+              input#item.inputbar(type='text' name='item' placeholder='Add New')
+            ul#list.tasklist
+
+  script.
+    let loggedUserRole = !{JSON.stringify(getLoggedUserRole)};
+    if(loggedUserRole == 'agency'){
+      let tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1); 
+      document.cookie = "user=" +loggedUserRole +"; expires=" + tomorrow +"; path=/";
+      let elementsToHide = document.querySelectorAll('.hideforAgencyUser');
+      elementsToHide.forEach(function(elementsToHide){
+        elementsToHide.style = 'display: none;'
+      });
+    }
+    (function(){
+      
+        var list = document.querySelector('#list'),
+            form = document.querySelector('form'),
+            item = document.querySelector('#item');
+        
+        form.addEventListener('submit',function(e){
+          e.preventDefault();
+          list.innerHTML += '<li>' + item.value + '</li>';
+          store();
+          item.value = "";
+        },false)
+        
+        list.addEventListener('click',function(e){
+          var t = e.target;
+          if(t.classList.contains('checked')){
+            t.parentNode.removeChild(t);
+          } else {
+            t.classList.add('checked');
+          }
+          store();
+        },false)
+        
+        function store() {
+          window.localStorage.myitems = list.innerHTML;
+        }
+        
+        function getValues() {
+          var storedValues = window.localStorage.myitems;
+          if(!storedValues) {
+            list.innerHTML = '<li>Make a to do list</li>'+
+                            '<li>Check off first thing on the to do list</li>'+
+                            '<li>Remove from list once completed</li>';
+                            
+          }
+          else {
+            list.innerHTML = storedValues;
+          }
+        }
+        getValues();
+      })();
+      
+
+    $( document ).ready(function() {
+      const fieldReviewMapNotesRSSFeedURL = !{JSON.stringify(settingsRecord.osmEndpoint)} + '/api/0.6/notes/feed?bbox=' + !{JSON.stringify(settingsRecord.bbox)};
+      const rssFeedId = document.getElementById('rss-feeds');
+      $.get(fieldReviewMapNotesRSSFeedURL, function (feedData) { 
+        console.log(feedData); // Remove after this section is completed
+        $(feedData).find('item').each(function () {
+          var el = $(this);
+                   
+          $('#rss-feeds').append('<p></p>');
+          $('#rss-feeds').append('<img src="../images/commenticon.png" alt="date of mape note" class="feedicons" "width="30" height="30">');
+          $('#rss-feeds').append(el.find('dc\\:creator').text(),' , ',
+            el.find('pubDate').text(),
+          );
+          $('#rss-feeds').append('<p></p>');
+          $('#rss-feeds').append(el.find('title').text());
+          $('#rss-feeds').append('<p></p>');
+          $('#rss-feeds').append('<a href=' + el.find('link').text()+ ' class="viewmapnote" target="_blank">View Map-Note</a>',
+            $('#rss-feeds').append('<img src="../images/gotolink.png" alt="go to link" class="feedicons" width="30" height="30">')
+          );
+          $('#rss-feeds').append('<hr>'); 
+          rssFeedId.appendChild(document.createElement('br'));
+        }); 
+      });
+    })
+
+ 

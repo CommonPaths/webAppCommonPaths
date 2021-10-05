@@ -1,0 +1,111 @@
+extends layout
+
+block content
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/settings') Settings
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li
+                a(href='/officers/list') Officers List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Delete Officer Profile
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    if officerSearchResult && !(officerSearchResultCount === 0)
+        P
+        .formcontainer
+            form(method='POST' action='')
+                .form-row
+                    .form-group.col-md-4
+                        label(for='id') Officer Record ID: 
+                        input#id.form-control(type='text' placeholder='enter first name' name='id' readonly required='true' value=officerSearchResult[0].dataValues.id)
+                    .form-group.col-md-4.margin
+                        label(for='idNumber') Officer ID Number: 
+                        input#idNumber.form-control(type='text' placeholder='enter idNumber' name='idNumber' readonly required='true' value=officerSearchResult[0].dataValues.idNumber)
+                    .form-group.col-md-4.margin
+                        label(for='firstName') First Name: 
+                        input#firstName.form-control(type='text' placeholder='enter full name' name='firstName' readonly required='true' value=officerSearchResult[0].dataValues.firstName)
+                    .form-group.col-md-4
+                        label(for='lastName') Last Name: 
+                        input#lastName.form-control(type='text' placeholder='enter last name' name='lastName'  readonly required='true' value=officerSearchResult[0].dataValues.lastName)
+                    .form-group.col-md-4.margin
+                        label(for='eMail') email: 
+                        input#eMail.form-control(type='text' placeholder='enter last name' name='eMail' readonly required='true' value=officerSearchResult[0].dataValues.eMail)
+                    .form-group.col-md-4.margin
+                        label(for='zoneZips') Enter Field Assignment Area: 
+                        input#zoneZips.form-control(type='text' placeholder='enter zoneZips' name='zoneZips' readonly required='true' value=officerSearchResult[0].dataValues.zoneZips)
+
+                    .form-group.col-md-4
+                        label(for='cognitoSub') Cognito Sub: 
+                        input#cognitoSub.form-control(type='text' placeholder='enter cognitoSub' name='cognitoSub' readonly required='true' value=officerSearchResult[0].dataValues.cognitoSub)
+                    .form-group.col-md-4.margin
+                        label(for='officerTitle') Officer Title: 
+                        input#officerTitle.form-control(type='text' name="officerTitle" readonly required='true' value=officerSearchResult[0].dataValues.officerTitle)       
+                    .form-group.col-md-4
+                        label(for='officerRoles') Officer Role: 
+                        input#officerRoles.form-control(type='text' name="officerRoles" readonly required='true' value=officerSearchResult[0].dataValues.officerRoles)
+
+                    .form-group.col-md-4.margin
+                        label(for='active') Active?
+                        input#active.form-control(type='text' placeholder='active' name="active" readonly required='true' value=officerSearchResult[0].dataValues.active.toString())
+                            
+                        
+                    .form-group.col-md-4
+                        label(for='agency') Agency: 
+                        input#agency.form-control(type='text' placeholder='enter agency' name='agency' readonly required='true' value=officerSearchResult[0].dataValues.agency)
+                    
+                .form-row
+                    .form-group.col-md-2
+                        if officerSearchResult[0].deletedAt === null
+                            input.primarybutton(type='submit' value='Delete' onclick="return confirm('Are you sure you want to Delete?')")
+                            .form-row
+                                .form-group.col-md-12       
+                                .form-group.col-md-12
+                                    input(type='checkbox' name='permanentDelete' value='true')
+                                    label(for='permanentDelete') &nbsp;Permanently
+                        else
+                            input.primarybutton(type='submit' value='Restore')
+                    .form-group.col-md-2
+                        input.secondarybutton(type='button' value='Cancel' onclick="location.href='/officers/list';")
+                
+    if  officerSearchResultCount === 0
+        p No Records Found
+
+    if s_status == 'Record Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/officers/list';") Go to Officers List
+
+    if s_status == 'Record Permanently Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/officers/list';") Go to Officers List
+
+    if s_status == 'Record Restored'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/officers/list';") Go to Officers List
+
+
+    if s_status == 'Error Processing Record'
+        .notifydiv
+            h1=s_status
+            img.notifywarningicon(src='/images/warningnotify.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/officers/list';") Go to Officers List
+
+
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg

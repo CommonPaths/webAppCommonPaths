@@ -1,0 +1,106 @@
+extends layout
+
+block content
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/settings') Settings
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li
+                a(href='/officers/list') Officers List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Update Officer Profile
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    if officer_search_result && !(search_result_count === 0)
+        .topbar
+            .enterdetail
+                form(action="" method="GET")
+                    label(for = "id") 
+                    input.searchbox.inp-icon(
+                        type="search"
+                        id="id"
+                        name="id"
+                        required='true'
+                        placeholder='search by id'
+                        value=''
+                        )
+                    
+        .formcontainer 
+            form(method='POST' action='')
+                .form-row
+                    .form-group.col-md-4.margin
+                        label(for='id') Officer Record ID: 
+                        input#id.form-control(type='text' placeholder='enter first name' name='id'  readonly required='true' value=officer_search_result[0].dataValues.id)
+                    .form-group.col-md-4
+                        label(for='idNumber') Officer ID Number: 
+                        input#idNumber.form-control(type='text' placeholder='enter idNumber' name='idNumber' required='true' value=officer_search_result[0].dataValues.idNumber)                    
+                    .form-group.col-md-4.margin
+                        label(for='firstName') First Name: 
+                        input#firstName.form-control(pattern= "^[a-zA-Z_ ]*$" placeholder='enter full name' name='firstName' required='true' value=officer_search_result[0].dataValues.firstName)
+                    .form-group.col-md-4
+                        label(for='lastName') Last Name: 
+                        input#lastName.form-control(pattern= "^[a-zA-Z_ ]*$" placeholder='enter last name' name='lastName' required='true' value=officer_search_result[0].dataValues.lastName)
+                    .form-group.col-md-4.margin
+                        label(for='eMail') email: 
+                        input#eMail.form-control(type='email' placeholder='enter last name' name='eMail' required='true' value=officer_search_result[0].dataValues.eMail)
+                    .form-group.col-md-4.margin
+                        label(for='zoneZips') Enter Field Assignment Area: 
+                        input#zoneZips.form-control(type='text' placeholder='enter zoneZips' name='zoneZips' required='true' value=officer_search_result[0].dataValues.zoneZips)
+                        
+                    .form-group.col-md-4
+                        label(for='cognitoSub') Cognito Sub: 
+                        input#cognitoSub.form-control(type='text' placeholder='enter cognitoSub' name='cognitoSub' required='true' value=officer_search_result[0].dataValues.cognitoSub)
+                    .form-group.col-md-4.margin
+                        label(for='officerTitle') Officer Title: 
+                        select#officerTitle.form-control(type='select' name = "officerTitle" value=officer_search_result[0].dataValues.officerTitle)
+                            option(value=officer_search_result[0].dataValues.officerTitle, selected, label=officer_search_result[0].dataValues.officerTitle) 
+                            option(value='Sr. Officer', label= "Sr. officer")
+                            option(value='Officer', label= "Officer")
+                            option(value='Trainee' label="Trainee")
+                    .form-group.col-md-4.margin
+                        label(for='officerRoles') Officer Role: 
+                        select#officerRoles.form-control(type='select' name = "officerRoles" value=officer_search_result[0].dataValues.officerRoles)
+                            option(value=officer_search_result[0].dataValues.officerRoles, selected, label=officer_search_result[0].dataValues.officerRoles) 
+                            option(value='supervisor' label="supervisor") 
+                            option(value='reviewer' label="reviewer")
+                            option(value='agency' label="agency")
+                            option(value='admin', label= "admin")   
+                    .form-group.col-md-4.margin
+                        label(for='active') Active? 
+                        select#active.form-control(type='select' name = "active" value=officer_search_result[0].dataValues.active)
+                            option(value=officer_search_result[0].dataValues.active.toString(), selected, label=officer_search_result[0].dataValues.active.toString()) 
+                            option(value='true', label="True" )
+                            option(value='false', label="False")
+                    .form-group.col-md-4
+                        label(for='agency') Agency: 
+                        input#agency.form-control(type='text' placeholder='enter agency' name='agency' required='true' value=officer_search_result[0].dataValues.agency)
+                    .formfooter.col-md-12
+                        input.primarybutton.submit(type='submit' value='Save Changes')
+                        input.secondarybutton.submit(type='button' value='Cancel' onclick="location.href='/officers/list';")
+
+    if  search_result_count === 0
+        h3 No Records Found
+    
+    if s_status == 'Record updated'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/officers/list';") Go to Officers List
+
+    if s_status == 'Error updating record'
+        .notifydiv
+            h1=s_status
+            img.notifywarningicon(src='/images/warningnotify.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/officers/list';") Go to Officers List
+
+   
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg

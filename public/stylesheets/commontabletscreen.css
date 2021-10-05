@@ -1,0 +1,21 @@
+@media screen and (max-width: 900px) {
+    .number {
+      font-size: 1.5em;
+    }
+    .illustrationdesign {
+      width: 120px;
+      height: 120px;
+    }
+    .floatleftwelcome {
+      font-size: 16px;
+    }
+  }
+  @media (max-width: 767.98px) {
+    .space {
+      margin-right: 0;
+    }
+    .col-1{
+      margin: 0;
+      padding: 0;
+    }
+  }

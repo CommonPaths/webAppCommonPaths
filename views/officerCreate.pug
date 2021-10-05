@@ -1,0 +1,103 @@
+extends layout
+
+block content
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/settings') Settings
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li
+                a(href='/officers/list') Officers List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Create New Officer
+
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+        
+
+    .formcontainer
+        form#Form(method='POST' action='')
+            .form-row
+                .form-group.required.col-md-4
+                    label.control-label(for='idNumber') Officer ID Number: 
+                    input#idNumber.form-control.form-control-md(type='integer' placeholder='enter officer Id #' name='idNumber' required='true' value='')
+                .form-group.required.col-md-4.margin
+                    label.control-label(for='firstName') First Name: 
+                    input#firstName.form-control.form-control-md(pattern= "^[a-zA-Z_ ]*$" placeholder='enter first name' name='firstName' required='true' value='') 
+                .form-group.required.col-md-4
+                    label.control-label(for='lastName') Last Name: 
+                    input#lastName.form-control.form-control-md(pattern= "^[a-zA-Z_ ]*$" placeholder='enter last name' name='lastName' required='true' value='')             
+                .form-group.required.col-md-4
+                    label.control-label(for='zoneZips') Enter Field Assignment Area:
+                    input#zoneZips.form-control.form-control-md(type='text' placeholder='enter Field Assignment Area' name='zoneZips' required='true' value='') 
+                .form-group.required.col-md-4.margin
+                    label.control-label(for='eMail') Email: 
+                    input#eMail.form-control.form-control-md(type='email' placeholder='enter email address' name='eMail' required='true' value='')
+                .form-group.required.col-md-4
+                    label.control-label(for='agency') Agency:
+                    input#agency.form-control.form-control-md(type='text' placeholder='enter Agency' name='agency' required='false' value='')
+                .form-group.required.col-md-4.margin
+                    label.control-label(for='officerTitle') Officer Title:
+                    select#officerTitle.form-control.custom-select(type='select' name='officerTitle' value='')
+                        option(value=null, label="-- Select --")
+                        option(value='Sr. Officer', label= "Sr. officer")
+                        option(value='Officer', label= "Officer")
+                        option(value='Trainee' label="Trainee")
+                .form-group.required.col-md-4.margin
+                    label.control-label(for='officerRoles') Officer Role:
+                    select#officerRoles.form-control.custom-select(type='select' name='officerRoles' value='')
+                        option(value=null, label="-- Select --")
+                        option(value='supervisor' label="supervisor") 
+                        option(value='reviewer' label="reviewer")
+                        option(value='agency' label="agency")
+                        option(value='admin', label= "admin")  
+                
+                .form-group.required.col-md-4
+                    label.control-label(for='active') Active?
+                    select#active.form-control.custom-select(type='select' required='true' name="active" value='')
+                        option(value=null, label="-- Select --") 
+                        option(value='true' label="True" )
+                        option(value='false', label= "False")
+                    
+                .formfooter.col-md-12
+                    input.primarybutton.submit(type='submit' value='Create')
+                    input.secondarybutton.submit(type='button' value='Cancel' onclick="location.href='/officers/list';")
+
+    if s_status == 'Record saved'
+        .alert.alert-success.alert-dismissable.fade.show(role='alert')
+            .popupalerts
+                button.close(type='button' data-dismiss='alert')
+                    span(aria-hidden='true') &times;
+                .notificationicon
+                    iconify-icon(data-icon='teenyicons:tick-circle-outline')
+                h2.alert-heading Success! 
+                p                    
+                .alert-body
+                    | Officer Profile Added! 
+                p                 
+                .alert-footer
+                    button.neu.popupbtn(type='button' onclick="location.href='/officers/create';") Add new officer
+
+    
+    if s_status == 'Record already exists'
+        .alert.alert-danger.alert-dismissable.fade.show(role='alert')
+            .popupalerts
+                button.close(type='button' data-dismiss='alert')
+                    span(aria-hidden='true') &times;
+                .warningicon
+                    iconify-icon(data-icon='carbon:warning-square')
+                h2.alert-heading Officer already exists!
+                p
+                .alert-body
+                    | Create another record!
+                p
+                .alert-footer
+                    button.neu.popupbtn(type='button' onclick="location.href='/officers/create';") Add new officer
+                         
+
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg

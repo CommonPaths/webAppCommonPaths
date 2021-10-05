@@ -1,0 +1,243 @@
+extends layout
+
+block content
+    
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/pathwayItinerary/list') Pathway List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Delete/Restore Pathway Record
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    if ADAPathwaySearchResult && !(ADAPathwaySearchResult === 0)  
+        .container-fluid.card
+            .form-row
+                .form-group.col-sm-2
+                    label(for='clientId') ClientId: 
+                    input#clientId.form-control.form-control-sm(type='text' placeholder='ClientId' name='clientId'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.clientId)               
+                .form-group.col-sm-2
+                    label(for='clientName') Client Name: 
+                    input#clientName.form-control.form-control-sm(type='text' placeholder='Client Name' name='clientName'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.clientName)     
+                .form-group.col-sm-2
+                    label(for='active') Active: 
+                    input#active.form-control.form-control-sm(type='text' placeholder='Active' name='active'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.active)   
+                .form-group.col-sm-2
+                    label(for='conditions') Conditions: 
+                    input#conditions.form-control.form-control-sm(type='text' placeholder='Conditions' name='conditions'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.conditions ? tripRequestSearchResult[0].ClientProfileModel.conditions.toString() : '-')               
+                .form-group.col-sm-2
+                    label(for='mobAids') Mobility Aid: 
+                    input#clientName.form-control.form-control-sm(type='text' placeholder='Mobility Aid' name='mobAids'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.mobAids ? tripRequestSearchResult[0].ClientProfileModel.mobAids.toString() : '-')     
+                .form-group.col-sm-2
+                    label(for='prefSpaceType') Space Type: 
+                    input#prefSpaceType.form-control.form-control-sm(type='text' placeholder='Space Type' name='prefSpaceType'  readonly required='true' value=tripRequestSearchResult[0].ClientProfileModel.prefSpaceType ? tripRequestSearchResult[0].ClientProfileModel.prefSpaceType.toString() : '-')    
+            
+            .form-row
+                .form-group.col-sm-1
+                    label(for='tripRequestId') TripHist.ID: 
+                    input#tripRequestId.form-control.form-control-sm(type='text' placeholder='tripRequestId' name='tripRequestId'  readonly required='true' value=tripRequestSearchResult[0].id)               
+                .form-group.col-sm-1
+                    label(for='bookingId') Bkg ID: 
+                    input#bookingId.form-control.form-control-sm(type='text' placeholder='bookingId' name='bookingId'  readonly required='true' value=tripRequestSearchResult[0].bookingId)  
+                .form-group.col-sm-2
+                    label(for='daysOfWeekRequested') Days-Week: 
+                    input#daysOfWeekRequested.form-control.form-control-sm(type='text' placeholder='Days-Week' name='daysOfWeekRequested'  readonly required='true' value=tripRequestSearchResult[0].daysOfWeekRequested.toString())
+                .form-group.col-sm-2
+                    label(for='tripTime') Trip/Appointment Time: 
+                    input#tripTime.form-control.form-control-sm(type='text' placeholder='Time' name='tripTime'  readonly required='true' value=(tripRequestSearchResult[0].tripTime === null ? '--:--:--' : tripRequestSearchResult[0].tripTime) + ' / ' + 
+                        (tripRequestSearchResult[0].appointmentTime === null ? '--:--:--' : tripRequestSearchResult[0].appointmentTime) )   
+                .form-group.col-sm-2
+                    label(for='dateAdded') Date Added: 
+                    input#dateAdded.form-control.form-control-sm(type='text' placeholder='Date Added' name='dateAdded'  readonly required='true' value=tripRequestSearchResult[0].DateAdded) 
+                .form-group.col-sm-2
+                    label(for='dateCompleted') Date Completed: 
+                    input#dateCompleted.form-control.form-control-sm(type='text' placeholder='Date Completed' name='dateCompleted'  readonly required='true' value=tripRequestSearchResult[0].dateCompleted)  
+                .form-group.col-sm-2
+                    label(for='status') Status: 
+                    input#status.form-control.form-control-sm(type='text' placeholder='Status' name='status'  readonly required='true' value=tripRequestSearchResult[0].status)  
+            .form-row
+                .form-group.col-sm-2
+                    label(for='pName') Origin Name/Unit: 
+                    input#pName.form-control.form-control-sm(type='text' placeholder='Origin Name/Unit' name='pName'  readonly required='true' value=tripRequestSearchResult[0].pName + ' , ' + tripRequestSearchResult[0].pUnit)     
+                .form-group.col-sm-4
+                    label(for='address') Origin Address: 
+                    input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=tripRequestSearchResult[0].pAddr + ', ' + tripRequestSearchResult[0].pCity  + ', ' +  tripRequestSearchResult[0].pZip )  
+                .form-group.col-sm-2
+                    label(for='dName') Destination Name/Unit: 
+                    input#pName.form-control.form-control-sm(type='text' placeholder='Dest. Name/Unit' name='dName'  readonly required='true' value=tripRequestSearchResult[0].dName + ' , ' + tripRequestSearchResult[0].dUnit)     
+                .form-group.col-sm-4
+                    label(for='address') Destination Address: 
+                    input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=tripRequestSearchResult[0].dAddr + ', ' + tripRequestSearchResult[0].dCity  + ', ' +  tripRequestSearchResult[0].dZip ) 
+        
+        hr
+        
+        form#instructionForm(method='POST' action='')
+            .accordion.container-fluid.card(id="accordion")
+                .form-group.col-sm-1
+                    label(for='id') Pathway ID:
+                    input.form-control.form-control-sm(id='id' name='id' type='text' readonly value=ADAPathwaySearchResult[0].id)
+                each leg, i in ADAPathwaySearchResult[0].itineraryInstructionLegs
+                    if leg.mode === 'WALK'
+                        .card-header.collapsed.container-fluid.card(data-toggle="collapse" href="#collapseOne")
+                            .form-row
+                                .form-group.col-sm-5
+                                    label(for='leg[][from]') From:
+                                    input.form-control.form-control-sm(id='leg[][from]' name=i+'.from' type='text' readonly value=leg.from)
+                                .form-group.col-sm-1
+                                    label(for='leg.[mode]') Mode:
+                                    input.form-control.form-control-sm(id='leg[][mode]' name=i+'.mode' type='text' readonly value=leg.mode)
+                                .form-group.col-sm-1
+                                    label(for='leg.[walkDistance]') Dist.Total(ft.):
+                                    input.form-control.form-control-sm(id='leg[][walkDistance]' name=i+'.walkDistance' type='text' readonly value=leg.walkDistance)
+                                .form-group.col-sm-5
+                                    label(for='leg[][to]') To:
+                                    input.form-control.form-control-sm(id='leg[][to]' name=i+'.to' type='text' readonly value=leg.to)
+                        .card-body.collapse.container-fluid.card(id="collapseOne" data-parent="#accordion" style="background-color:#E9ECEF; width:99rem;")
+                                each step, s in leg.steps
+                                    .form-row
+                                        .form-group.col-sm-2
+                                            label(for='leg[][steps][][relativeDirection]') Instruction:
+                                            input.form-control.form-control-sm(id='leg[][steps][][relativeDirection]' name=i+'.steps.'+s+'.relativeDirection' type='text' readonly value=step.relativeDirection)
+                                        .form-group.col-sm-1
+                                            label(for='leg[][steps][][absoluteDirection]') Direction:
+                                            input.form-control.form-control-sm(id='leg[][steps][][absoluteDirection]' name=i+'.steps.'+s+'.absoluteDirection' type='text' readonly value=step.absoluteDirection)
+                                        .form-group.col-sm-2
+                                            label(for='leg[][steps][][streetName]') Street-Name:
+                                            input.form-control.form-control-sm(id='leg[][steps][][streetName]' name=i+'.steps.'+s+'.streetName' type='text' readonly value=step.streetName)
+                                        .form-group.col-sm-1
+                                            label(for='leg[][steps][][distance]') Distance(ft.):
+                                            input.form-control.form-control-sm(id='leg[][steps][][distance]' name=i+'.steps.'+s+'.distance' type='text' readonly value=step.distance)
+                                        .form-group.col-sm-1
+                                            label(for='leg[][steps][][slope]') Slope:
+                                            input.form-control.form-control-sm(id='leg[][steps][][slope]' name=i+'.steps.'+s+'.slope' type='text' readonly value=step.slope)
+                                        .form-group.col-sm-2
+                                            label(for='leg[][steps][][barriers]') Barriers:
+                                            input.form-control.form-control-sm(id='leg[][steps][][barriers]' name=i+'.steps.'+s+'.barriers' type='text' readonly value=step.barriers)
+                                        .form-group.col-sm-2
+                                            label(for='leg[][steps][][notes]') Notes:
+                                            input.form-control.form-control-sm(id='leg[][steps][][notes]' name=i+'.steps.'+s+'.notes' type='text' readonly value=step.notes)
+
+                    else if (leg.mode === 'BUS' || leg.mode === 'TRAM')
+                        .card-header.collapsed.container-fluid.card(data-toggle="collapse" href="#collapseOne")
+                            .form-row
+                                .form-group.col-sm-5
+                                    label(for='leg[][from]') From:
+                                    input.form-control.form-control-sm(id='leg[][from]' name=i+'.from' type='text' readonly value=leg.from)
+                                .form-group.col-sm-2
+                                    label(for='leg[][mode]') Mode:
+                                    input.form-control.form-control-sm(id='leg[][mode]' name=i+'.mode' type='text' readonly value=leg.mode)
+                                .form-group.col-sm-5
+                                    label(for='leg[][to]') To:
+                                    input.form-control.form-control-sm(id='leg[][to]' name=i+'.to' type='text' readonly value=leg.to)
+                        .card-body.collapse.container-fluid.card(id="collapseOne" data-parent="#accordion" style="background-color:#E9ECEF; width:99rem;")
+                                .form-row
+                                    .form-group.col-sm-1
+                                        label(for='leg[][busStopFrom][name]') Bus-Stop-From:
+                                        input.form-control.form-control-sm(id='leg[][busStopFrom][name]' name=i+'.busStopFrom.name' type='text' readonly value=leg.busStopFrom.name)
+                                    .form-group.col-sm-1
+                                        label(for='leg[][busStopFrom][shelter]') Shelter:
+                                        input.form-control.form-control-sm(id='leg[][busStopFrom][shelter]' name=i+'.busStopFrom.shelter' type='text' readonly value=leg.busStopFrom.shelter)
+                                    .form-group.col-sm-1
+                                        label(for='leg[][busStopFrom][bench]') Bench:
+                                        input.form-control.form-control-sm(id='leg[][busStopFrom][bench]' name=i+'.busStopFrom.bench' type='text' readonly value=leg.busStopFrom.bench)
+                                    .form-group.col-sm-1
+                                        label(for='leg[][busStopFrom][light]') Light:
+                                        input.form-control.form-control-sm(id='leg[][busStopFrom][light]' name=i+'.busStopFrom.light' type='text' readonly value=leg.busStopFrom.light)
+                                    
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+
+                                    .form-group.col-sm-1
+                                        label(for='leg[][busNumber]') Bus-number:
+                                        input.form-control.form-control-sm(id='leg[][busNumber]' name=i+'.busNumber' type='text' readonly value=leg.busNumber)
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+                                    .form-group.col-xs-1
+
+                                    .form-group.col-sm-1
+                                        label(for='leg[][busStopTo][name]') Bus-Stop-To:
+                                        input.form-control.form-control-sm(id='leg[][busStopTo][name]' name=i+'.busStopTo.name' type='text' readonly value=leg.busStopTo.name)
+                                    .form-group.col-sm-1
+                                        label(for='leg[][busStopTo][shelter]') Shelter:
+                                        input.form-control.form-control-sm(id='leg[][busStopTo][shelter]' name=i+'.busStopTo.shelter' type='text' readonly value=leg.busStopTo.shelter)
+                                    .form-group.col-sm-1
+                                        label(for='leg[][busStopTo][bench]') Bench:
+                                        input.form-control.form-control-sm(id='leg[][busStopTo][bench]' name=i+'.busStopTo.bench' type='text' readonly value=leg.busStopTo.bench)
+                                    .form-group.col-sm-1
+                                        label(for='leg[][busStopTo][light]') Light:
+                                        input.form-control.form-control-sm(id='leg[][busStopTo][light]' name=i+'.busStopTo.light' type='text' readonly value=leg.busStopTo.light)
+
+                                .form-row
+                                    .form-group.col-sm-2
+                                        label(for='leg[][busStopFrom][barriers]') Barriers:
+                                        input.form-control.form-control-sm(id='leg[][busStopFrom][barriers]' name=i+'.busStopFrom.barriers' type='text' readonly value=leg.busStopFrom.barriers)
+                                    .form-group.col-sm-2
+                                        label(for='leg[][busStopFrom][notes]') Notes:
+                                        input.form-control.form-control-sm(id='leg[][busStopFrom][notes]' name=i+'.busStopFrom.notes' type='text' readonly value=leg.busStopFrom.notes)
+                                    .form-group.col-sm-3
+                                    .form-group.col-sm-2
+                                        label(for='leg[][busStopTo][barriers]') Barriers:
+                                        input.form-control.form-control-sm(id='leg[][busStopTo][barriers]' name=i+'.busStopTo.barriers' type='text' readonly value=leg.busStopTo.barriers)
+                                    .form-group.col-sm-2
+                                        label(for='leg[][busStopTo][notes]') Notes:
+                                        input.form-control.form-control-sm(id='leg[][busStopTo][notes]' name=i+'.busStopTo.notes' type='text' readonly value=leg.busStopTo.notes)
+            p
+            .form-row
+                .form-group.col-md-2
+                    if ADAPathwaySearchResult[0].deletedAt === null
+                        input.primarybutton(type='submit' value='Delete' onclick="return confirm('Are you sure you want to Delete?')")
+                        .form-group.col-md-12
+                            input(type='checkbox' name='permanentDelete' value='true')
+                            label(for='permanentDelete') &nbsp;Permanently
+                                
+                    else 
+                        input.primarybutton(type='submit' value='Restore')
+                .form-group.col-md-2
+                    input.secondarybutton(type='button' value='Cancel' onclick="location.href='/pathwayItinerary/list';")
+                
+
+    if s_status == 'Record Permanently Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/pathwayItinerary/list';") Go to Pathways
+
+
+    if s_status == 'Record Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/pathwayItinerary/list';") Go to Pathways
+   
+    if s_status == 'Record Restored'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/pathwayItinerary/list';") Go to Pathways
+ 
+
+    if s_status == 'Error Processing Record'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/pathwayItinerary/list';") Go to Pathways
+
+                 
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg

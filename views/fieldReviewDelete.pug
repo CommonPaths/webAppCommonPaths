@@ -1,0 +1,151 @@
+extends layout
+
+block content
+
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/reviews') Reviews Dashboard
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Field Review Delete/Restore Record
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    if fieldReviewData && !(fieldReviewResultCount === 0)
+        .container-fluid.card
+            .form-row
+                .form-group.col-sm-2
+                    label(for='clientId') ClientID: 
+                    input#clientId.form-control.form-control-sm(type='text' placeholder='ClientId' name='clientId'  readonly required='true' value=fieldReviewData[0].TripRequestModel.ClientProfileModel.clientId)               
+                .form-group.col-sm-2
+                    label(for='clientName') Client Name: 
+                    input#clientName.form-control.form-control-sm(type='text' placeholder='Client Name' name='clientName'  readonly required='true' value=fieldReviewData[0].TripRequestModel.ClientProfileModel.clientName)     
+                .form-group.col-sm-2
+                    label(for='active') Active: 
+                    input#active.form-control.form-control-sm(type='text' placeholder='Active' name='active'  readonly required='true' value=fieldReviewData[0].TripRequestModel.ClientProfileModel.active)   
+                .form-group.col-sm-2
+                    label(for='conditions') Conditions: 
+                    input#conditions.form-control.form-control-sm(type='text' placeholder='Conditions' name='conditions'  readonly required='true' value=fieldReviewData[0].TripRequestModel.ClientProfileModel.conditions ? fieldReviewData[0].TripRequestModel.ClientProfileModel.conditions.toString() : '-')               
+                .form-group.col-sm-2
+                    label(for='mobAids') Mobility Aid: 
+                    input#clientName.form-control.form-control-sm(type='text' placeholder='Mobility Aid' name='mobAids'  readonly required='true' value=fieldReviewData[0].TripRequestModel.ClientProfileModel.mobAids ? fieldReviewData[0].TripRequestModel.ClientProfileModel.mobAids.toString() : '-')     
+                .form-group.col-sm-2
+                    label(for='prefSpaceType') Space Type: 
+                    input#prefSpaceType.form-control.form-control-sm(type='text' placeholder='Space Type' name='prefSpaceType'  readonly required='true' value=fieldReviewData[0].TripRequestModel.ClientProfileModel.prefSpaceType ? fieldReviewData[0].TripRequestModel.ClientProfileModel.prefSpaceType.toString() : '-')  
+                .form-group.col-sm-12
+                    label(for='notes') Notes: 
+                    input#notes.form-control.form-control-sm(type='text' placeholder='Notes' name='notes'  readonly required='true' value=fieldReviewData[0].TripRequestModel.ClientProfileModel.notes)  
+            hr
+            .form-row
+                .form-group.col-sm-1
+                    label(for='tripRequestId') TripHist.ID: 
+                    input#tripRequestId.form-control.form-control-sm(type='text' placeholder='tripRequestId' name='tripRequestId'  readonly required='true' value=fieldReviewData[0].TripRequestModel.id)               
+                .form-group.col-sm-1
+                    label(for='bookingId') Bkg.ID: 
+                    input#bookingId.form-control.form-control-sm(type='text' placeholder='bookingId' name='bookingId'  readonly required='true' value=fieldReviewData[0].TripRequestModel.bookingId)   
+                .form-group.col-sm-2
+                    label(for='priority') Priority: 
+                    input#priority.form-control.form-control-sm(type='text' placeholder='Priority' name='priority'  readonly required='true' value=fieldReviewData[0].TripRequestModel.priority) 
+                .form-group.col-sm-3
+                    label(for='pName') Origin Name/Unit: 
+                    input#pName.form-control.form-control-sm(type='text' placeholder='Origin Name/Unit' name='pName'  readonly required='true' value=fieldReviewData[0].TripRequestModel.pName + ' , ' + fieldReviewData[0].TripRequestModel.pUnit)     
+                .form-group.col-sm-5
+                    label(for='address') Origin Address: 
+                    input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=fieldReviewData[0].TripRequestModel.pAddr + ', ' + fieldReviewData[0].TripRequestModel.pCity  + ', ' +  fieldReviewData[0].TripRequestModel.pZip )  
+            .form-row
+                .form-group.col-sm-2
+                    label(for='dateAdded') Date Added: 
+                    input#dateAdded.form-control.form-control-sm(type='text' placeholder='Date Added' name='dateAdded'  readonly required='true' value=fieldReviewData[0].TripRequestModel.DateAdded)     
+                .form-group.col-sm-2
+                    label(for='tripTime') Trip/Appointment Time: 
+                    input#tripTime.form-control.form-control-sm(type='text' placeholder='Time' name='tripTime'  readonly required='true' value=fieldReviewData[0].TripRequestModel.tripTime.toString() + ' / ' + fieldReviewData[0].TripRequestModel.appointmentTime.toString())
+                .form-group.col-sm-3
+                    label(for='dName') Destination Name/Unit: 
+                    input#pName.form-control.form-control-sm(type='text' placeholder='Dest. Name/Unit' name='pName'  readonly required='true' value=fieldReviewData[0].TripRequestModel.dName + ' , ' + fieldReviewData[0].TripRequestModel.dUnit)     
+                .form-group.col-sm-5
+                    label(for='address') Destination Address: 
+                    input#address.form-control.form-control-sm(type='text' placeholder='Address' name='address'  readonly required='true' value=fieldReviewData[0].TripRequestModel.dAddr + ', ' + fieldReviewData[0].TripRequestModel.dCity  + ', ' +  fieldReviewData[0].TripRequestModel.dZip ) 
+            .form-row   
+                .form-group.col-sm-2
+                    label(for='daysOfWeekRequested') Days-Week: 
+                    input#daysOfWeekRequested.form-control.form-control-sm(type='text' placeholder='Days-Week' name='daysOfWeekRequested'  readonly required='true' value=fieldReviewData[0].TripRequestModel.daysOfWeekRequested.toString())
+                .form-group.col-sm-10
+                    label(for='notes') Notes: 
+                    input#notes.form-control.form-control-sm(type='text' placeholder='Notes' name='notes'  readonly required='true' value=fieldReviewData[0].TripRequestModel.notes)
+        hr 
+        .container-fluid.card
+            form(method='POST' action='')
+                .form-row
+                    .form-group.col-sm-2
+                        label(for='fieldReviewId') Field Review ID: 
+                        input#fieldReviewId.form-control.form-control-sm(type='text' placeholder='Field Review ID' name='fieldReviewId'  readonly required='true' value=fieldReviewData[0].id) 
+                    .form-group.col-sm-2
+                        label(for='mapNoteId') <a href=!{fieldReviewData[0].URLMapNote} target='blank'> Map Note ID:</a> 
+                        input#mapNoteId.form-control.form-control-sm(type='text' placeholder='Review Location' name='mapNoteId'  readonly required='true' value=fieldReviewData[0].mapNoteId)   
+                    .form-group.col-sm-2
+                        label(for='reviewLocation') Review Location: 
+                        input#reviewLocation.form-control.form-control-sm(type='text' placeholder='Review Location' name='reviewLocation'  readonly required='true' value=fieldReviewData[0].reviewLocation)   
+                    .form-group.col-sm-2
+                        label(for='officer') Officer: 
+                        input#officer.form-control.form-control-sm(type='text' placeholder='Officer' name='officer'  readonly required='true' value=fieldReviewData[0].OfficerModel.id + '. '+ fieldReviewData[0].OfficerModel.lastName + ', ' + fieldReviewData[0].OfficerModel.firstName ) 
+                    .form-group.col-sm-2
+                        label(for='priority') Priority: 
+                        input#priority.form-control.form-control-sm(type='text' placeholder='Priority' name='priority'  readonly required='true' value=fieldReviewData[0].priority)  
+                    .form-group.col-sm-2  
+                        label(for='status') Status:
+                        input#priostatusrity.form-control.form-control-sm(type='text' placeholder='status' name='status'  readonly required='true' value=fieldReviewData[0].status)
+                .form-row
+                    .form-group.col-sm-2
+                        label(for='reviewStartDate') Start Date: 
+                        input#reviewStartDate.form-control.form-control-sm(type='text' placeholder='Review Start Date' name='reviewStartDate'  readonly required='true' value=fieldReviewData[0].reviewStartDate)    
+                    .form-group.col-sm-2
+                        label(for='reviewCompleteDate') Complete Date: 
+                        input#reviewCompleteDate.form-control.form-control-sm(type='date' placeholder='Review Start Date' name='reviewCompleteDate' readonly value=fieldReviewData[0].reviewCompleteDate)
+                    .form-group.col-sm-8
+                        label(for='notes') Notes: 
+                        input#notes.form-control.form-control-sm(type='text' placeholder='Notes' name='notes'  required='true' readonly value=fieldReviewData[0].notes)
+                .form-row
+                    .form-group.col-md-2
+                        if fieldReviewData[0].deletedAt === null   
+                            input.primarybutton(type='submit' value='Delete' onclick="return confirm('Are you sure you want to Delete?')")
+                            .form-row
+                                .form-group.col-md-12
+                                .form-group.col-md-12
+                                    input(type='checkbox' name='permanentDelete' value='true')
+                                    label(for='permanentDelete') &nbsp;Permanently            
+                        else 
+                            input.primarybutton(type='submit' value='Restore')
+                    .form-group.col-md-2
+                        input.secondarybutton(type='button' value='Cancel' onclick="location.href='/reviews';")
+
+    if  fieldReviewResultCount === 0
+        p No Records Found
+    if s_status == 'Record Permanently Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/reviews';") Go to Reviews
+    if s_status == 'Record Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/reviews';") Go to Reviews
+    if s_status == 'Record Restored'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/reviews';") Go to Reviews
+    if s_status == 'Error Processing Record'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/reviews';") Go to Reviews
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg

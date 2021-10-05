@@ -1,0 +1,60 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "********",
+    "database": "XXXXXXXX",
+    "host": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "port": "5432",
+    "dialect": "postgres",
+    "databases": {
+      "kcm": {
+        "username": "XXXXXXXX",
+        "password": "********",
+        "database": "XXXXXXXX",
+        "host": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "port": "5432",
+        "dialect": "postgres"
+      },
+      "elpaso": {
+        "username": "XXXXXXXX",
+        "password": "********",
+        "database": "XXXXXXXX",
+        "host": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "port": "5432",
+        "dialect": "postgres"
+      }
+    }
+  },
+  "sea": {
+    "username": "XXXXXXXX",
+    "password": "********",
+    "database": "XXXXXXXX",
+    "host": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "port": "5432",
+    "dialect": "postgres"
+  },
+  "elpaso": {
+    "username": "XXXXXXXX",
+    "password": "********",
+    "database": "XXXXXXXX",
+    "host": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "port": "5432",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "XXXXXXXX",
+    "password": null,
+    "database": "XXXXXXXX",
+    "host": "127.0.0.1",
+    "port": "5432",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "XXXXXXXX",
+    "password": "********",
+    "database": "XXXXXXXX",
+    "host": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "port": "5432",
+    "dialect": "postgres"
+  }
+}

@@ -1,0 +1,39 @@
+extends layout
+
+block content
+
+    .header
+      a.pagetitle
+        | Settings
+      .gradient
+        .username #{user.username} 
+          i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    br
+    br
+    br
+    .container-fluid.settingcards
+      .cards-row
+        .card-deck
+          .card.settingcard
+            .card-block
+              .centericon
+                img.icon(src='../images/gsettings.png')
+              h4.card-title General Settings
+              button.primarybutton(type='button' onclick="location.href='/settings/general';") Edit
+              
+          .card.settingcard
+            .card-block
+              .centericon
+                img.icon(src='../images/usersettings.png')
+              h4.card-title Officer Settings
+              button.primarybutton(type='button' onclick="location.href='officers/list';") Edit
+              
+          .card.settingcard
+            .card-block
+              .centericon
+                img.icon(src='../images/lookupicon.png')
+              h4.card-title Other Settings
+              button.primarybutton(type='button' onclick="location.href='/lookuptables/list';") Edit
+ 
+              

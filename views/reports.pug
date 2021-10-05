@@ -1,0 +1,84 @@
+extends layout
+
+block content
+
+    script.
+      let loggedUserRole = !{JSON.stringify(getLoggedUserRole)};
+      if(loggedUserRole == 'agency'){
+        let tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.cookie = "user=" +loggedUserRole +"; expires=" + tomorrow +"; path=/";
+      }
+      window.icons = {
+          columns: 'ion-md-menu',
+          fullscreen: 'ion-md-expand',
+          export: 'ion-md-download',
+          toggleOff: 'ion-md-arrow-up',
+          toggleOn: 'ion-md-arrow-down'
+      }
+
+    .header
+      a.pagetitle
+        | Reports
+      .gradient
+        .username #{user.username} 
+          i.fa.fa-user-circle(aria-hidden='true').usernameicon
+
+    br
+
+    .formcontainer
+      form(method='POST' action='')
+        .form-row
+          .form-group.col-md-4
+            label Report Start Date:
+            input#reportStartDate.form-control.form-control-sm(type='date' name='reportStartDate' required='true')
+          .form-group.col-md-4
+            label Report End Date:
+            input#reportEndDate.form-control.form-control-sm(type='date' name='reportEndDate' required='true')
+          .form-group.col-md-4
+            label(for='officersId') Select Officer:
+            select#officersId.form-control.form-control-sm(type='select' required='true' name = "officersId" value='')
+              option(value=null, label="-- Select --") 
+              if officers
+                each item , i in Object.entries(officers)
+                  option(value=item[1].id, label=item[1].id+ ": " + item[1].lastName + ", " + item[1].firstName)
+        .form-row
+            input.primarybutton.submit.showstats(type='submit' value='Show-Statistics')
+      hr
+
+      .tablecontainer.table
+        table.table.btn-table.table-responsive.w-auto.table-striped.table-borderless(
+            id="table"
+            data-toggle="table"
+            data-show-toggle="true"
+            data-toolbar="#toolbar" 
+            data-show-columns="true" 
+            data-show-columns-toggle-all="true" 
+            data-detail-view="true" 
+            data-show-export="true" 
+            data-pagination="false" 
+            data-page-list="[10, 25, 50, 100, all]" 
+            data-show-footer="true"
+            data-icons-prefix="icon"
+            data-icons="icons"
+            data-show-detail-view="true"
+            
+           )
+          thead.bg-color
+            tr
+              th(align="center" data-field="tripRequestCountReport") Trips
+              th(align="center" data-field="adaPathwayCountReport") Bus Pathways
+              th(align="center" data-field="noAdaPathwayCountReport") Access Pathways
+              th(align="center" data-field="desktopReviewWithoutFieldReviewCountReport") Desktop Reviews
+              th(align="center" data-field="fieldReviewCountReport") Field Reviews
+              th(align="center" data-field="officerDesktopReviewCountReport") Officer Desktop Reviews Without Field Reviews
+              th(align="center" data-field="officerFieldReviewCountReport") Officer Field Reviews
+          tbody
+            tr
+              td(align='center') #{tripRequestCountReport}
+              td(align='center') #{adaPathwayCountReport}
+              td(align='center') #{noAdaPathwayCountReport}
+              td(align='center') #{desktopReviewWithoutFieldReviewCountReport}
+              td(align='center') #{fieldReviewCountReport}
+              td(align='center') #{officerDesktopReviewCountReport}
+              td(align='center') #{officerFieldReviewCountReport}

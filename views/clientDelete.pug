@@ -1,0 +1,116 @@
+extends layout
+
+block content
+    
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/clients/list') Clients List
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Delete Client
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+ 
+    if clientSearchResult && !(clientSearchResultCount === 0)
+        P
+        .formcontainer
+            form(method='POST' action='')
+                .form-row
+                    .form-group.col-md-6
+                        label(for='clientId') Client ID: 
+                        input#clientId.form-control(type='text' placeholder='enter first name' name='clientId'  readonly required='true' 
+                            value=clientSearchResult[0].dataValues.clientId)
+                    .form-group.col-md-6
+                        label(for='clientName') Full Name: 
+                        input#clientName.form-control(type='text' placeholder='enter full name' name='clientName' readonly required='true' 
+                            value=clientSearchResult[0].dataValues.clientName)
+
+                    .form-group.col-md-6
+                        label(for='conditions') Eligibility conditions: 
+                        input#conditions.form-control(type='text' placeholder='enter eligibility conditions' name='conditions' readonly required='true' 
+                            value=clientSearchResult[0].dataValues.conditions.toString())
+                    .form-group.col-md-6
+                        label(for='mobAids') Mobility Aid: 
+                        input#mobAids.form-control(type='text' placeholder='enter mobility aid code' name='mobAids' readonly required='true' 
+                            value=clientSearchResult[0].dataValues.mobAids.toString())
+                    .form-group.col-md-6
+                        label(for='prefSpaceType') Space Type: 
+                        input#prefSpaceType.form-control(type='text' placeholder='enter space type code' name='prefSpaceType' readonly required='true' 
+                            value=clientSearchResult[0].dataValues.prefSpaceType.toString())
+                    .form-group.col-md-6
+                        label(for='btt') BTT:
+                        input#btt.form-control(type='text' placeholder='enter btt' name='btt' readonly value=clientSearchResult[0].dataValues.btt)
+                    .form-group.col-md-6
+                        label(for='clientStatus') Client Active:
+                        input#clientStatus.form-control(type='text' placeholder='clientStatus' name='clientStatus' readonly value=clientSearchResult[0].dataValues.clientStatus.toString())
+                    .form-group.col-md-12
+                        label(for='notes') Notes: 
+                        input#notes.form-control(type='text' placeholder='enter notes' name='notes' readonly required='true' value=clientSearchResult[0].dataValues.notes)
+                
+                    .form-group.col-md-3
+                        if clientSearchResult[0].deletedAt === null
+                            if tripRequestSearchResultCount === 0  
+                                input.primarybutton(type='submit' value='Delete' onclick="return confirm('Are you sure you want to Delete?')")
+                                .form-row
+                                    .form-group.col-md-12
+                                    .form-group.col-md-12
+                                        input(type='checkbox' name='permanentDelete' value='true')
+                                        label(for='permanentDelete') &nbsp;Permanently
+                            else
+                                input.neuDisabled(type='button' disabled value='Delete' )
+                                .form-group.col-md-12
+                                    p Cannot Delete
+                        else 
+                            input.neu(type='submit' value='Restore')
+
+                    .form-group.col-md-3
+                        input.secondarybutton(type='button' value='Cancel' onclick="location.href='/clients/list';")
+
+                    .col-md-12
+                        if tripRequestSearchResultCount !==0
+                            strong #{tripRequestSearchResultCount} - Related Record(s) of Trip History Found  
+                
+
+        
+    if  clientSearchResultCount === 0
+        p No Records Found
+        a(href='../../clients/list') Go to Clients List
+    
+    //- if s_status
+    //-     h3 Go to Clients List
+
+    if s_status == 'Record Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/clients/list';") Go to Clients List
+
+    if s_status == 'Record Permanently Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/clients/list';") Go to Clients List
+
+    if s_status == 'Record Restored'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/clients/list';") Go to Clients List
+
+
+    if s_status == 'Error Processing Record'
+        .notifydiv
+            h1=s_status
+            img.notifywarningicon(src='/images/warningnotify.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/clients/list';") Go to Clients List
+
+
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg

@@ -1,0 +1,187 @@
+extends layout
+
+block content
+    .topnav
+        ul.breadcrumb
+            li
+                a(href='/tripRequests/list') Trip History
+                    i.fa.fa-caret-right(aria-hidden='true')
+            li Delete Trip History
+        .gradient
+            .username.userright #{user.username} 
+                i.fa.fa-user-circle(aria-hidden='true').usernameicon
+    
+    if tripRequestSearchResult && !(tripRequestSearchResultCount === 0)
+        P
+        .formcontainer
+            form(method='POST' action='')
+                .form-row
+                    .form-group.col-md-3
+                        label(for='id') Trip Req. ID:  
+                        input#id.form-control(type='text' placeholder='Trip Request ID' name='id' readonly
+                            value=tripRequestSearchResult[0].dataValues.id)
+                    .form-group.col-md-3
+                        label(for='bookingId') Booking ID:  
+                        input#bookingId.form-control(type='text' placeholder='Booking ID' name='bookingId' readonly
+                            value=tripRequestSearchResult[0].dataValues.bookingId)
+                    .form-group.col-md-3
+                        label(for='clientId') Client ID of the Trip Request : 
+                        input#clientsId.form-control(type='text' placeholder='Existing Client ID' name='clientsId' readonly 
+                            value=tripRequestSearchResult[0].dataValues.ClientProfileModel.clientId)
+                    .form-group.col-md-3
+                        label(for='trips') Trips Count:  
+                        input#trips.form-control(type='text' placeholder='Trips Count' name='trips' readonly
+                            value=tripRequestSearchResult[0].dataValues.trips)
+                    .form-group.col-md-3
+                        label(for='pName') Origin Address Name: 
+                        input#pName.form-control(type='text' placeholder='Origin Name' name='pName' readonly 
+                            value=tripRequestSearchResult[0].dataValues.pName)
+                    .form-group.col-md-3
+                        label(for='pAddr') Origin Address: 
+                        input#pAddr.form-control(type='text' placeholder='Origin Address' name='pAddr' readonly
+                            value=tripRequestSearchResult[0].dataValues.pAddr)
+                    .form-group.col-md-2
+                        label(for='pUnit') Origin Unit Name: 
+                        input#pUnit.form-control(type='text' placeholder='Origin Unit Name' name='pUnit' readonly 
+                            value=tripRequestSearchResult[0].dataValues.pUnit)
+                    .form-group.col-md-3
+                        label(for='pCity') Origin City: 
+                        input#pCity.form-control(type='text' placeholder='Origin City' name='pCity' readonly 
+                            value=tripRequestSearchResult[0].dataValues.pCity)
+                    .form-group.col-md-1  
+                        label(for='pZip') Origin Zip: 
+                        input#pZip.form-control(type='text' placeholder='Origin Zip Code' name='pZip' readonly
+                            value=tripRequestSearchResult[0].dataValues.pZip)
+                    .form-group.col-md-3
+                        label(for='dName') Destination Address Name: 
+                        input#pName.form-control(type='text' placeholder='Destination Name' name='dName' readonly 
+                            value=tripRequestSearchResult[0].dataValues.dName)
+                    .form-group.col-md-3
+                        label(for='dAddr') Destination Address: 
+                        input#pAddr.form-control(type='text' placeholder='Destination Address' name='dAddr' readonly
+                            value=tripRequestSearchResult[0].dataValues.dAddr)
+                    .form-group.col-md-2
+                        label(for='dUnit') Destination Unit Name: 
+                        input#dUnit.form-control(type='text' placeholder='Destination Unit Name' name='dUnit' readonly 
+                            value=tripRequestSearchResult[0].dataValues.dUnit)
+                    .form-group.col-md-3          
+                        label(for='dCity') Destination City: 
+                        input#pCity.form-control(type='text' placeholder='Destination City' name='dCity' readonly
+                            value=tripRequestSearchResult[0].dataValues.dCity)
+                    .form-group.col-md-1
+                        label(for='dZip') Dest. Zip: 
+                        input#dZip.form-control(type='text' placeholder='Dest. Zip Code' name='dZip' readonly 
+                            value=tripRequestSearchResult[0].dataValues.dZip)
+                    .form-group.col-md-6
+                        label(for='DateAdded') Date Trip Request Added: 
+                        input#DateAdded.form-control(type='date' name='DateAdded' readonly 
+                            value=tripRequestSearchResult[0].dataValues.DateAdded)
+                    .form-group.col-md-6
+                        label(for='daysOfWeekRequested') Day(s) of Week Requested:
+                        input#daysOfWeekRequested.form-control(type='text' name='DateAdded' readonly
+                            value=tripRequestSearchResult[0].dataValues.daysOfWeekRequested.toString())
+                    .form-group.col-md-3
+                        label(for='tripRequestType') Trip Request Type:
+                        input#tripRequestType.form-control(type='text' name='tripRequestType' readonly
+                            value=tripRequestSearchResult[0].dataValues.tripRequestType)
+                    .form-group.col-md-3
+                        label(for='priority') Priority:
+                        input#priority.form-control(type='text' name='priority' readonly
+                            value=tripRequestSearchResult[0].dataValues.priority)
+                    .form-group.col-md-3
+                        label(for='tripTime') Trip Time: 
+                        input#tripTime.form-control(type='time' name='tripTime' readonly
+                            value=tripRequestSearchResult[0].dataValues.tripTime)
+                    .form-group.col-md-3
+                        label(for='appointmentTime') Appointment Time: 
+                        input#appointmentTime.form-control(type='time' name='appointmentTime' readonly
+                            value=tripRequestSearchResult[0].dataValues.appointmentTime)
+                    .form-group.col-md-3
+                        label(for='status') Status:
+                        input#status.form-control(type='text' name='status' readonly
+                            value=tripRequestSearchResult[0].dataValues.status)
+                    .form-group.col-md-3
+                        label(for='dateCompleted') Date Pathway Completed:
+                        input#dateCompleted.form-control(type='date' name='dateCompleted' readonly
+                            value=tripRequestSearchResult[0].dataValues.dateCompleted)
+                    .form-group.col-md-6
+                        label(for='officersId') Assigned Officer: 
+                        input#officersId.form-control(type='text' name='officersId' readonly 
+                            value=tripRequestSearchResult[0].dataValues.officersId + ': ' + tripRequestSearchResult[0].dataValues.OfficerModel.lastName + ', ' + tripRequestSearchResult[0].dataValues.OfficerModel.firstName)
+                    .form-group.col-md-12
+                        label(for='notes') Notes: 
+                        input#notes.form-control(type='text' placeholder='enter notes' readonly name='notes' 
+                            value=tripRequestSearchResult[0].dataValues.notes)
+                
+                    .form-group.col-md-2
+                        if tripRequestSearchResult[0].deletedAt === null
+                            if desktopReviewSearchResultCount === 0 && fieldReviewSearchResultCount === 0 &&  ADAPathwaySearchResultCount === 0  
+                                input.primarybutton(type='submit' value='Delete' onclick="return confirm('Are you sure you want to Delete?')" )
+                                .form-row
+                                    .form-group.col-md-12
+                                    .form-group.col-md-12
+                                        input(type='checkbox' name='permanentDelete' value='true')
+                                        label(for='permanentDelete') &nbsp;Permanently
+                            else
+                                input.neuDisabled(type='button' disabled value='Delete' )
+                                .form-group.col-md-12
+                                    p Cannot Delete
+                        else 
+                            input.primarybutton(type='submit' value='Restore')
+
+                    .form-group.col-md-2
+                        input.secondarybutton(type='button' value='Cancel' onclick="location.href='/tripRequests/list';")
+
+                    .col-md-12
+                        if desktopReviewSearchResultCount !==0
+                            strong #{desktopReviewSearchResultCount} - Related Record(s) of Desktop-Review Found  
+                    .col-md-12
+                        if fieldReviewSearchResultCount !==0
+                            strong #{fieldReviewSearchResultCount} - Related Record(s) of Field-Review Found
+                    .col-md-12
+                        if ADAPathwaySearchResultCount !==0
+                            strong #{ADAPathwayResultCount} - Related Record(s) of ADA-Pathway Found
+                    
+
+            
+    if  tripRequestSearchResultCount === 0
+        p No Records Found
+        a(href='../../tripRequests/list') click here to go back
+
+
+    if s_status == 'Record Permanently Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip Requests
+
+
+    if s_status == 'Record Deleted !'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip Requests
+  
+
+    if s_status == 'Error Processing Record'
+        .notifydiv
+            h1=s_status
+            img.notifywarningicon(src='/images/warningnotify.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip Requests
+
+
+    if s_status == 'Record Restored'
+        .notifydiv
+            h1=s_status
+            img.notifyicon(src='/images/success.png')
+            p
+            button.neu.popupbtn(type='button' onclick="location.href='/tripRequests/list';") Go to Trip Requests
+
+        
+    if errors 
+        ul
+            for error in errors
+                li!= error.msg
